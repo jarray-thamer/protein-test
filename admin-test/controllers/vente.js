@@ -151,7 +151,7 @@ exports.createVente = async (req, res) => {
       note: req.body.note || "",
       modePayment: req.body.modePayment || "CASH",
       status: req.body.status || "pending",
-      promoCode: promotionCode || "",
+      promoCode: {id: promotionCode._id, code: promotionCode.code, value: promotionCode.discount} || "",
     });
 
     const savedVente = await vente.save();

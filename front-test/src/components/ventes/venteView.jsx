@@ -458,7 +458,7 @@ const VenteView = () => {
                             <span className="text-muted-foreground">
                               Promo Code {vente.promoCode && `(${vente.promoCode.code })`}
                             </span>
-                            <span className="text-red-600">-{vente.promoCode.discount * 100}%</span>
+                            <span className="text-red-600">-{vente.promoCode.value * 100}%</span>
                           </div>
                         )}
                       </>
