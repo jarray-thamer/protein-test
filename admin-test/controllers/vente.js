@@ -121,6 +121,7 @@ exports.createVente = async (req, res) => {
     discount = discount.plus(req.body.additionalDiscount || 0)
     // Calculate net amount to pay
     const netAPayer = totalTTC.minus(discount);
+    const promoCodeObject = {id: promotionCode._id, code: promotionCode.code, value: promotionCode.discount}
 
     // Create and save the Vente
     const vente = new Vente({
@@ -151,7 +152,7 @@ exports.createVente = async (req, res) => {
       note: req.body.note || "",
       modePayment: req.body.modePayment || "CASH",
       status: req.body.status || "pending",
-      promoCode: {id: promotionCode._id, code: promotionCode.code, value: promotionCode.discount} || "",
+      promoCode: promoCodeObject || "",
     });
 
     const savedVente = await vente.save();
