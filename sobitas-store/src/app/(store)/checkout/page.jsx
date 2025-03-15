@@ -126,8 +126,10 @@ export default function CheckoutPage() {
       }
 
       const response = await axiosInstance.get(
-        `/promo-code/validate?code=${formData.promoCode}`
+        `/promo-code/validate/${formData.promoCode}?code=${formData.promoCode}`
       );
+      console.log(response);
+
       const data = await response.json();
 
       if (!response.ok || !data.valid) {
