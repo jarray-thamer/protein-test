@@ -113,16 +113,7 @@ export const NavHeader = () => {
               }
             />
           </form>
-          <Link
-            href="/wishlist"
-            className="items-center justify-center hidden lg:flex"
-          >
-            <HeartIcon className="mr-[.3rem]" strokeWidth={1.8} size={24} />
-            <span className="bg-primary flex items-center justify-center rounded-[50%] min-w-5 h-5 font-normal text-[10px] text-white">
-              {wishlistCount || 0}
-            </span>
-          </Link>
-          <CartCounter />
+
           <Sheet>
             <SheetTrigger>
               <AlignJustifyIcon

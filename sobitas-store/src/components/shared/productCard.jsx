@@ -133,7 +133,10 @@ const ProductCard = ({ user, product, type = "products" }) => {
             disabled={!product?.inStock}
             onClick={(e) => {
               e.preventDefault();
-              addToCart(product);
+              addToCart({
+                ...product,
+                type: type === "pack" ? "Pack" : "Product",
+              });
             }}
             className={cn(
               "uppercase w-full text-primary border border-primary group/cart flex items-center justify-center py-2 space-x-2.5 transition-all duration-200 ease-in-out",

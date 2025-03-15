@@ -118,6 +118,7 @@ export default function CheckoutPage() {
   };
 
   // Apply promo code
+  const [promoCode, setPromoCode] = useState();
   const handleApplyPromoCode = async () => {
     try {
       if (!formData.promoCode) {
@@ -128,21 +129,21 @@ export default function CheckoutPage() {
       const response = await axiosInstance.get(
         `/promo-code/validate/${formData.promoCode}?code=${formData.promoCode}`
       );
-      console.log(response);
 
-      const data = await response.json();
+      const { data } = response.data;
 
-      if (!response.ok || !data.valid) {
+      if (!response?.data.valid) {
         throw new Error(data.message || "Invalid promo code");
       }
 
       // Calculate discount based on backend response
       let discountAmount = 0;
       if (response.data.valid) {
-        discountAmount = cartTotalWithTVA * data.discountValue;
+        discountAmount = cartTotalWithTVA * response.data.discountValue;
       }
 
       setPromoDiscount(discountAmount);
+      setPromoCode(response.data);
       setPromoCodeApplied(true);
     } catch (error) {
       setPromoDiscount(0);
@@ -188,45 +189,39 @@ export default function CheckoutPage() {
         d17: "D17",
       };
 
-      const response = await axiosInstance.post(`/vente/new`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await axiosInstance.post(`/vente/commande/new`, {
+        items: cart.map((item) => ({
+          type: item.type,
+          slug: item.slug, // Ensure cart items have _id from your product data
+          designation: item.designation,
+          quantity: item.quantity,
+          price: item.price,
+          oldPrice: item.oldPrice || null,
+          variant: item.selectedVariant?.title || "",
+        })),
+        client: {
+          name: formData.name,
+          email: formData.email,
+          phone1: formData.phone1,
+          phone2: formData.phone2,
+          address: formData.address,
+          ville: formData.city,
+          clientNote: formData.note,
         },
-        body: JSON.stringify({
-          items: cart.map((item) => ({
-            type: "Product",
-            itemId: item._id, // Ensure cart items have _id from your product data
-            designation: item.designation,
-            quantity: item.quantity,
-            price: item.price,
-            oldPrice: item.oldPrice || null,
-            variant: item.selectedVariant?.title || "",
-          })),
-          client: {
-            name: formData.name,
-            email: formData.email,
-            phone1: formData.phone1,
-            phone2: formData.phone2,
-            address: formData.address,
-            ville: formData.city,
-            clientNote: formData.note,
-          },
-          isNewClient: true,
-          promoCode: formData.promoCode,
-          livraison: shippingCost,
-          modePayment: paymentMethodMap[paymentMethod],
-          note: formData.note,
-        }),
+        isNewClient: true,
+        promoCode: formData.promoCode,
+        livraison: shippingCost,
+        modePayment: paymentMethodMap[paymentMethod],
+        note: formData.note,
       });
 
-      if (!response.ok) {
+      if (!response.data.success) {
         throw new Error("Failed to place order");
       }
 
       setOrderNumber(response.data.reference); // Use backend-generated reference
       setOrderPlaced(true);
-      clearCart();
+      // clearCart();
     } catch (error) {
       console.error("Error submitting order:", error.response?.data);
       alert(
@@ -599,8 +594,8 @@ export default function CheckoutPage() {
               {promoCodeApplied && (
                 <p className="flex items-center gap-1 mt-2 text-sm text-green-600">
                   <TagIcon size={14} />
-                  {formData.promoCode === "PROMO10" ? "10%" : "5%"} de remise
-                  appliquée avec succès !
+                  {promoCode.discountValue * 100} de remise appliquée avec
+                  succès !
                 </p>
               )}
             </div>

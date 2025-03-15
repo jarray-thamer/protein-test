@@ -17,7 +17,7 @@ exports.createVente = async (req, res) => {
     const { items } = req.body;
     const { clientId } = req.body || "";
     const { client } = req.body;
-    const { livreur } = req.body || { name: "", cin: "", carNumber: "" };
+    const { livreur } = req.body;
 
     if (req.body.isNewClient) {
       const newClient = new Client({
@@ -145,9 +145,9 @@ exports.createVente = async (req, res) => {
         clientNote: client.clientNote || "",
       },
       livreur: {
-        name: livreur.name || "",
-        cin: livreur.cin || "",
-        carNumber: livreur.carNumber || "",
+        name: livreur?.name || "",
+        cin: livreur?.cin || "",
+        carNumber: livreur?.carNumber || "",
       },
       items,
       tva: tva.toFixed(3),
@@ -178,17 +178,16 @@ exports.createVente = async (req, res) => {
 exports.validatePromoCode = async (req, res) => {
   try {
     const { code } = req.query;
-    console.log(code);
 
     if (!code) {
       return res.status(400).json({ message: "Promo code is required" });
     }
 
-    const promoCode = await PromoCode.findOne({ code });
+    const promoCode = await PromoCode.findOne({ code: code.toString() });
 
     if (
       !promoCode ||
-      !promoCode.isActive ||
+      !promoCode.status ||
       promoCode.endDate < new Date() ||
       promoCode.startDate > new Date()
     ) {
@@ -508,6 +507,167 @@ exports.deleteVenteMany = async (req, res) => {
     console.error("Bulk delete error:", error);
     return res.status(500).json({
       message: "Bulk delete operation failed",
+      error: error.message,
+    });
+  }
+};
+
+exports.createCommandeVente = async (req, res) => {
+  try {
+    const reference = await generateReference();
+    const advancedInfo = await Information.findOne().select("advanced -_id");
+    const { items } = req.body;
+    const { client } = req.body;
+    const { livreur } = req.body;
+
+    let clientId;
+    const clientExists = await Client.findOne({
+      $and: [{ email: client.email }, { phone1: client.phone1 }],
+    });
+    // Client handling
+    if (!clientExists) {
+      const newClient = new Client({
+        name: client.name || "",
+        email: client.email || "",
+        phone1: client.phone1 || "",
+        address: client.address || "",
+        ville: client.ville || "",
+      });
+      const savedClient = await newClient.save();
+      clientId = savedClient._id;
+    } else {
+      // Find client by email or phone
+
+      if (!clientExists) {
+        return res.status(400).json({ message: "Client not found" });
+      }
+      clientId = clientExists._id;
+    }
+
+    // Promo code handling remains the same
+    const { promoCode } = req.body || "";
+    let promotionCode = null;
+    if (promoCode) {
+      promotionCode = await PromoCode.findOne({ code: promoCode });
+      if (!promotionCode) {
+        return res.status(400).json({ message: "Promotion code not found" });
+      }
+    }
+
+    // Initialize values
+    let tva = new Decimal(0);
+    let totalHT = new Decimal(0);
+    let livraisonCost = new Decimal(req.body.livraison || 0);
+    let productDiscount = new Decimal(0);
+    let packDiscount = new Decimal(0);
+    let discount = new Decimal(0);
+    let totalTTC = new Decimal(0);
+    const taxRate = new Decimal(advancedInfo.advanced.tva || 0.19);
+
+    // Process items using slug instead of ID
+    for (const item of items) {
+      let currentItem;
+      if (item.type === "Product") {
+        currentItem = await Product.findOne({ slug: item.slug });
+        if (!currentItem) {
+          throw new Error(`Product with slug ${item.slug} not found`);
+        }
+      } else if (item.type === "Pack") {
+        currentItem = await Pack.findOne({ slug: item.slug });
+        if (!currentItem) {
+          throw new Error(`Pack with slug ${item.slug} not found`);
+        }
+      }
+
+      // Update item with found ID
+      item.itemId = currentItem._id;
+
+      const currentPrice = new Decimal(currentItem.price.toString());
+      const oldPrice = currentItem.oldPrice
+        ? new Decimal(currentItem.oldPrice.toString())
+        : null;
+
+      // Calculate discounts
+      if (oldPrice) {
+        const discountAmount = oldPrice
+          .minus(currentPrice)
+          .times(item.quantity);
+        if (item.type === "Product") {
+          productDiscount = productDiscount.plus(discountAmount);
+        } else {
+          packDiscount = packDiscount.plus(discountAmount);
+        }
+      }
+
+      // Calculate totals
+      const itemTotal = currentPrice.times(item.quantity);
+      totalHT = totalHT.plus(itemTotal);
+      tva = tva.plus(currentPrice.times(taxRate).times(item.quantity));
+    }
+
+    // Calculate TTC and apply promo
+    totalTTC = totalHT
+      .plus(tva)
+      .plus(req.body.additionalCharges || 0)
+      .plus(livraisonCost)
+      .plus(advancedInfo.advanced.timber);
+
+    if (promotionCode?.isActive || promotionCode?.endDate > new Date()) {
+      discount = discount.plus(totalTTC.times(promotionCode?.discount));
+    }
+    discount = discount.plus(req.body.additionalDiscount || 0);
+
+    const netAPayer = totalTTC.minus(discount);
+
+    // Create Vente document
+    const vente = new Vente({
+      reference,
+      client: {
+        id: clientId,
+        name: client.name,
+        email: client.email || "",
+        phone1: client.phone1,
+        phone2: client.phone2 || "",
+        ville: client.ville,
+        address: client.address,
+        clientNote: client.clientNote || "",
+      },
+      livreur: {
+        name: livreur?.name || "",
+        cin: livreur?.cin || "",
+        carNumber: livreur?.carNumber || "",
+      },
+      items: items.map((item) => ({
+        ...item,
+        // Include both slug and ID for reference
+        slug: item.slug,
+        itemId: item.itemId,
+      })),
+      tva: tva.toFixed(3),
+      totalHT: totalHT.toFixed(3),
+      totalTTC: totalTTC.toFixed(3),
+      livraison: livraisonCost.toFixed(3),
+      discount: discount.toFixed(3) || 0,
+      productsDiscount: productDiscount.toFixed(3),
+      netAPayer: netAPayer.toFixed(3),
+      note: req.body.note || "",
+      modePayment: req.body.modePayment || "CASH",
+      status: req.body.status || "pending",
+      promoCode: promotionCode
+        ? {
+            id: promotionCode._id,
+            code: promotionCode.code,
+            value: promotionCode.discount,
+          }
+        : "",
+    });
+
+    const savedVente = await vente.save();
+    res.status(201).json({ success: true, reference: savedVente.reference });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error creating Vente",
       error: error.message,
     });
   }

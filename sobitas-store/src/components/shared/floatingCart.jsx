@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
 import useCartStore from "@/store/cart";
 import useInformationStore from "@/store/information";
+import Link from "next/link";
 
 const FloatingCart = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -187,9 +188,11 @@ const FloatingCart = () => {
                   >
                     Continue Shopping
                   </button>
-                  <button className="px-4 py-2 text-white transition-colors rounded-md bg-primary hover:bg-primary/90">
-                    Checkout
-                  </button>
+                  <Link href="/cart">
+                    <button className="px-4 py-2 text-white transition-colors rounded-md bg-primary hover:bg-primary/90">
+                      Checkout
+                    </button>
+                  </Link>
                 </div>
               </div>
             )}

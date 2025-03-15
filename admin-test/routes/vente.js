@@ -7,11 +7,13 @@ const {
   deleteVente,
   deleteVenteMany,
   updateVente,
+  createCommandeVente,
 } = require("../controllers/vente");
 
 const VenteRoutes = Router();
 
 VenteRoutes.post("/new", createVente);
+VenteRoutes.post("/commande/new", createCommandeVente);
 VenteRoutes.get("/get/all", getAllVentes);
 VenteRoutes.put("/update-status/:id", updateVenteStatus);
 VenteRoutes.get("/get/:id", getVenteById);

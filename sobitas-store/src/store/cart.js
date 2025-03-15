@@ -27,24 +27,31 @@ const useCartStore = create((set, get) => ({
     const variantId = product.selectedVariant
       ? product.selectedVariant.title
       : "";
-    return `${product.slug}${variantId ? `-${variantId}` : ""}`;
+    return `${product.type}-${product.slug}${variantId ? `-${variantId}` : ""}`;
   },
 
   // Add product to cart or increase quantity if it exists
   addToCart: (product) =>
     set((state) => {
-      // Check if product has necessary properties
+      // Validate product and add type information
       if (!product || !product.slug) {
         console.error("Invalid product data", product);
         return { cart: state.cart };
       }
 
+      // Add type with default to 'Product' if missing
+      const productWithType = {
+        ...product,
+        type: product.type || "Product", // Default to Product if not specified
+      };
+
       // Default quantity to 1 if not specified
-      const quantity = product.quantity || 1;
+      const quantity = productWithType.quantity || 1;
 
-      // Create a unique identifier using product slug and variant (if exists)
-      const uniqueId = get().getUniqueId(product);
+      // Create unique identifier using type, slug, and variant
+      const uniqueId = get().getUniqueId(productWithType);
 
+      // Find existing item index
       const existingProductIndex = state.cart.findIndex((item) => {
         const itemUniqueId = get().getUniqueId(item);
         return itemUniqueId === uniqueId;
@@ -53,16 +60,16 @@ const useCartStore = create((set, get) => ({
       let updatedCart;
 
       if (existingProductIndex !== -1) {
-        // If product with same variant exists, update its quantity
+        // Update existing item quantity
         updatedCart = [...state.cart];
         updatedCart[existingProductIndex] = {
           ...updatedCart[existingProductIndex],
           quantity: updatedCart[existingProductIndex].quantity + quantity,
         };
       } else {
-        // Add as new item with default quantity if not provided
+        // Add new item with type information
         const newProduct = {
-          ...product,
+          ...productWithType,
           quantity: quantity,
         };
         updatedCart = [...state.cart, newProduct];

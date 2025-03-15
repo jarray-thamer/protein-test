@@ -86,13 +86,15 @@ const ProductDetail = ({ item, relatedItems, type }) => {
   const handleAddToCart = () => {
     const productToAdd = {
       ...item,
-      quantity: quantity, // Use the selected quantity
+      type: type === "pack" ? "Pack" : "Product", // Add type information
+      quantity: quantity,
       selectedVariant: item?.variant?.length > 0 ? selectedVariant : null,
       price: selectedVariant?.price || item.price,
     };
 
     addToCart(productToAdd);
   };
+
   return (
     <div className="flex flex-col justify-center w-full px-4 pt-4 mx-auto md:px-8 max-w-screen-2xl">
       {/* Product header */}

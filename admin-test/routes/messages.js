@@ -7,6 +7,7 @@ const {
   updateMessageStatus,
   createMessage,
 } = require("../controllers/messages");
+const cors = require("cors");
 
 const messagesRoutes = Router();
 
