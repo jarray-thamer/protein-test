@@ -20,7 +20,7 @@ const LoginForm = () => {
     }
 
     try {
-      const res = await login(email, password);
+      const res = await login({ email, password });
       if (res.status === "ok") {
         router.push("/"); // Redirect to home page or dashboard
       } else {
