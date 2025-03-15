@@ -145,7 +145,7 @@ exports.createVente = async (req, res) => {
       totalHT: totalHT.toFixed(3),
       totalTTC: totalTTC.toFixed(3),
       livraison: livraisonCost.toFixed(3),
-      discount: discount.toFixed(3),
+      discount: discount.toFixed(3) || 0,
       productsDiscount: productDiscount.toFixed(3),
       netAPayer: netAPayer.toFixed(3),
       note: req.body.note || "",
