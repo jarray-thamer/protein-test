@@ -1,5 +1,4 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 
 // Login the user
 export const loginUser = async (data) => {
