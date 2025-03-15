@@ -139,7 +139,7 @@ exports.createVente = async (req, res) => {
         phone2: client.phone2 || "",
         ville: client.ville,
         address: client.address,
-        clientNote: req.body.clientNote || "",
+        clientNote: client.clientNote || "",
       },
       livreur: {
         name: livreur.name || "",

@@ -443,7 +443,7 @@ const VenteView = () => {
                       <span>{formatCurrency(advancedData.timber || 0)}</span>
                     </div>
 
-                    {(vente.discount) && (
+                    {(vente.discount || vente.promoCode) && (
                       <>
                         {vente.discount > 0 && (
                           <div className="flex justify-between text-sm">
@@ -453,12 +453,12 @@ const VenteView = () => {
                             <span className="text-red-600">-{vente?.discount}</span>
                           </div>
                         )}
-                        {vente.discount > 0 && (
+                        {vente.promoCode > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">
-                              Promo Code {vente.promoCode && `(${vente.promoCode.code })`}
+                              Promo Code {vente?.promoCode && `(${vente?.promoCode?.code })`}
                             </span>
-                            <span className="text-red-600">-{vente.promoCode.value * 100}%</span>
+                            {vente?.promoCode && <span className="text-red-600">-{vente?.promoCode?.value * 100}%</span>}
                           </div>
                         )}
                       </>
