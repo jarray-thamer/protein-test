@@ -48,7 +48,6 @@ const adminLogin = async (req, res, next) => {
     const token = createToken(adminUser._id.toString(), adminUser.role, "30d");
     const expires = new Date();
     expires.setDate(expires.getDate() + 30);
-    
 
     return res.status(200).json({
       message: "Logged in successfully",
@@ -92,11 +91,7 @@ const adminLogout = async (req, res, next) => {
 const verifyClient = async (req, res) => {
   try {
     const { _id } = res.locals.jwtData;
-    console.log("_id: " + _id);
-
     const client = await Client.findById(_id);
-    console.log("client: " + client);
-
     if (!client) {
       return res
         .status(401)
@@ -130,26 +125,10 @@ const clientLogin = async (req, res) => {
       return res.status(401).json({ message: "Incorrect Password" });
     }
 
-    // Clear cookie if there is one to create a new one
-    res.clearCookie(process.env.CLIENT_COOKIE_NAME, {
-      httpOnly: true,
-      signed: true,
-      path: "/",
-      domain: process.env.CLIENT_COOKIE_DOMAIN || "localhost:3000",
-    });
-
     const token = createToken(client._id.toString(), "client", "30d");
 
     const expires = new Date();
     expires.setDate(expires.getDate() + 30);
-
-    res.cookie(process.env.CLIENT_COOKIE_NAME, token, {
-      httpOnly: true,
-      expires,
-      domain: process.env.CLIENT_COOKIE_DOMAIN || "localhost",
-      path: "/",
-      signed: true,
-    });
 
     // Remove password from client object before sending
     const clientObj = client.toObject();
@@ -159,6 +138,7 @@ const clientLogin = async (req, res) => {
       status: "ok",
       message: "Logged in successfully",
       user: clientObj,
+      token,
     });
   } catch (error) {
     console.log("❌ Error", error);
@@ -200,14 +180,6 @@ const clientRegister = async (req, res) => {
     const expires = new Date();
     expires.setDate(expires.getDate() + 30);
 
-    res.cookie(process.env.CLIENT_COOKIE_NAME, token, {
-      httpOnly: true,
-      expires,
-      domain: process.env.CLIENT_COOKIE_DOMAIN || "localhost",
-      path: "/",
-      signed: true,
-    });
-
     // Remove password from client object before sending
     const clientObj = newClient.toObject();
     delete clientObj.password;
@@ -216,6 +188,7 @@ const clientRegister = async (req, res) => {
       status: "ok",
       message: "Registered successfully",
       user: clientObj,
+      token,
     });
   } catch (error) {
     console.log("❌ Error", error);
@@ -240,14 +213,6 @@ const clientLogout = async (req, res) => {
       // Fixed from req.locals.jwtData.id
       return res.status(401).json({ message: "Token not valid" });
     }
-
-    res.clearCookie(process.env.CLIENT_COOKIE_NAME, {
-      // Fixed from clearCookies to clearCookie
-      httpOnly: true,
-      signed: true,
-      path: "/",
-      domain: process.env.CLIENT_COOKIE_DOMAIN || "localhost", // Added fallback
-    });
 
     return res
       .status(200)

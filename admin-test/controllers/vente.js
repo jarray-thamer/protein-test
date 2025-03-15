@@ -233,10 +233,20 @@ exports.updateVenteStatus = async (req, res) => {
 exports.updateVente = async (req, res) => {
   try {
     const { id } = req.params;
-    const { items, client, livreur, modePayment, status, note, livraison } =
-      req.body;
+    const {
+      items,
+      client,
+      livreur,
+      modePayment,
+      status,
+      note,
+      livraison,
+      promoCode: newPromoCode,
+      additionalCharges,
+      additionalDiscount,
+    } = req.body;
 
-    // First fetch the existing vente to verify it exists
+    // Fetch existing vente
     const existingVente = await Vente.findById(id);
     if (!existingVente) {
       return res.status(404).json({
@@ -245,105 +255,98 @@ exports.updateVente = async (req, res) => {
       });
     }
 
-    // Recalculate all the financial values exactly as in createVente
     const advancedInfo = await Information.findOne().select("advanced -_id");
+    const taxRate = new Decimal(advancedInfo.advanced.tva || 0.19);
 
-    // Initialize values as Decimal.js instances
+    // Initialize values
     let tva = new Decimal(0);
     let totalHT = new Decimal(0);
-    let livraisonCost = new Decimal(
-      livraison || advancedInfo.advanced.livraison || 0
-    );
+    let livraisonCost = new Decimal(livraison || advancedInfo.advanced.livraison || 0);
     let productDiscount = new Decimal(0);
     let packDiscount = new Decimal(0);
     let discount = new Decimal(0);
     let totalTTC = new Decimal(0);
 
-    // Process each product
-    for (const item of items) {
-      if (item.type === "Product") {
-        const product = await Product.findById(item.itemId);
-
-        if (!product) {
-          throw new Error(`Product with id ${item.itemId} not found`);
-        }
-
-        // Handle decimal conversion safely
-        const currentPrice = new Decimal(product.price.toString());
-        const oldPrice = product.oldPrice
-          ? new Decimal(product.oldPrice.toString())
-          : null;
-
-        if (oldPrice) {
-          productDiscount = productDiscount.plus(oldPrice.minus(currentPrice));
-        }
-
-        const productTotal = currentPrice.times(item.quantity);
-        totalHT = totalHT.plus(productTotal);
-
-        // Use proper TVA rate
-        const taxRate = new Decimal(advancedInfo.advanced.tva || 0.19);
-        const productTva = currentPrice.times(taxRate).times(item.quantity);
-        tva = tva.plus(productTva);
-      } else if (item.type === "Pack") {
-        const pack = await Pack.findById(item.itemId);
-        if (!pack) {
-          throw new Error(`Pack with id ${item.itemId} not found`);
-        }
-
-        const currentPrice = new Decimal(pack.price.toString());
-        const oldPrice = pack.oldPrice
-          ? new Decimal(pack.oldPrice.toString())
-          : null;
-
-        if (oldPrice) {
-          packDiscount = packDiscount.plus(oldPrice.minus(currentPrice));
-        }
-
-        const packTotal = currentPrice.times(item.quantity);
-        totalHT = totalHT.plus(packTotal);
-
-        const taxRate = new Decimal(advancedInfo.advanced.tva || 0.19);
-        const packTva = currentPrice.times(taxRate).times(item.quantity);
-        tva = tva.plus(packTva);
+    // Validate new promo code
+    let promotionCode = existingVente.promoCode;
+    if (newPromoCode) {
+      promotionCode = await PromoCode.findOne({ code: newPromoCode });
+      if (!promotionCode) {
+        return res.status(400).json({ message: "Promotion code not found" });
       }
     }
 
-    // Calculate total TTC
+    // Process items
+    for (const item of items) {
+      let currentItem;
+      if (item.type === "Product") {
+        currentItem = await Product.findById(item.itemId);
+      } else if (item.type === "Pack") {
+        currentItem = await Pack.findById(item.itemId);
+      }
+      if (!currentItem) {
+        throw new Error(`${item.type} with id ${item.itemId} not found`);
+      }
+
+      const currentPrice = new Decimal(currentItem.price.toString());
+      const oldPrice = currentItem.oldPrice ? new Decimal(currentItem.oldPrice.toString()) : null;
+
+      if (oldPrice) {
+        if (item.type === "Product") {
+          productDiscount = productDiscount.plus(oldPrice.minus(currentPrice).times(item.quantity));
+        } else {
+          packDiscount = packDiscount.plus(oldPrice.minus(currentPrice).times(item.quantity));
+        }
+      }
+
+      const itemTotal = currentPrice.times(item.quantity);
+      totalHT = totalHT.plus(itemTotal);
+      tva = tva.plus(currentPrice.times(taxRate).times(item.quantity));
+    }
+
+    // Calculate TTC and discounts
     totalTTC = totalHT
       .plus(tva)
+      .plus(additionalCharges || 0)
       .plus(livraisonCost)
       .plus(advancedInfo.advanced.timber);
 
-    // Apply promo code discount if there is one
-    const promotionCode = existingVente.promoCode;
-    if (
-      promotionCode?.isActive ||
-      (promotionCode?.endDate && promotionCode?.endDate > new Date())
-    ) {
-      discount = discount.plus(totalTTC.times(promotionCode?.discount || 0));
+    if (promotionCode?.isActive || (promotionCode?.endDate && promotionCode.endDate > new Date())) {
+      discount = discount.plus(totalTTC.times(promotionCode.discount));
     }
+    discount = discount.plus(additionalDiscount || 0);
 
-    // Calculate net amount to pay
     const netAPayer = totalTTC.minus(discount);
 
-    // Update the vente with new values
+    // Construct promo code object
+    let promoCodeObject = promotionCode
+      ? { id: promotionCode._id, code: promotionCode.code, value: promotionCode.discount }
+      : "";
+
+    // Update livreur with defaults
+    const updatedLivreur = {
+      name: livreur?.name || "",
+      cin: livreur?.cin || "",
+      carNumber: livreur?.carNumber || "",
+    };
+
     const updatedVente = await Vente.findByIdAndUpdate(
       id,
       {
         client,
-        livreur,
+        livreur: updatedLivreur,
         items,
         tva: tva.toFixed(3),
         totalHT: totalHT.toFixed(3),
         totalTTC: totalTTC.toFixed(3),
         livraison: livraisonCost.toFixed(3),
         discount: discount.toFixed(3),
-        productsDiscount: productDiscount.toFixed(3),
+        productsDiscount: productDiscount.plus(packDiscount).toFixed(3), // Combine discounts
         netAPayer: netAPayer.toFixed(3),
         note: note || "",
         modePayment: modePayment || "CASH",
         status: status || "pending",
+        promoCode: promoCodeObject,
       },
       { new: true, runValidators: true }
     )
@@ -351,10 +354,7 @@ exports.updateVente = async (req, res) => {
       .populate("client")
       .populate("promoCode");
 
-    res.status(200).json({
-      success: true,
-      data: updatedVente,
-    });
+    res.status(200).json({ success: true, data: updatedVente });
   } catch (error) {
     res.status(500).json({
       success: false,
