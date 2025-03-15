@@ -66,6 +66,7 @@ const VenteView = () => {
       setIsLoading(true)
       try {
         const [venteRes, advancedRes] = await Promise.all([getVenteById(id), getAdvancedData()])
+        console.log("venteRes:", venteRes.data);
 
         setVente(venteRes.data)
         setAdvancedData(advancedRes)
@@ -449,7 +450,7 @@ const VenteView = () => {
                             <span className="text-muted-foreground">
                               Discount 
                             </span>
-                            <span className="text-red-600">-{vente.discount}</span>
+                            <span className="text-red-600">-{vente?.discount}</span>
                           </div>
                         )}
                         {vente.discount > 0 && (
