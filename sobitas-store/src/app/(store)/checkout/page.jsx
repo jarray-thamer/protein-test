@@ -76,7 +76,6 @@ export default function CheckoutPage() {
   // Shipping cost based on delivery method
   const shippingCosts = {
     standard: information?.advanced?.livraison || 7,
-    express: information?.advanced?.livraisonExpress || 12,
     pickup: 0,
   };
 
@@ -240,8 +239,6 @@ export default function CheckoutPage() {
         <p className="text-sm text-gray-600">
           {deliveryMethod === "standard"
             ? "Livraison standard (3-5 jours ouvrables)"
-            : deliveryMethod === "express"
-            ? "Livraison express (1-2 jours ouvrables)"
             : "Retrait en magasin (disponible le lendemain)"}
         </p>
       </div>
@@ -467,24 +464,6 @@ export default function CheckoutPage() {
                     <p className="text-sm text-gray-500">3-5 jours ouvrables</p>
                     <p className="mt-2 text-sm font-medium">
                       {formatPrice(shippingCosts.standard)} TND
-                    </p>
-                  </div>
-
-                  <div
-                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                      deliveryMethod === "express"
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => setDeliveryMethod("express")}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <TruckIcon size={16} />
-                      <span className="font-medium">Livraison express</span>
-                    </div>
-                    <p className="text-sm text-gray-500">1-2 jours ouvrables</p>
-                    <p className="mt-2 text-sm font-medium">
-                      {formatPrice(shippingCosts.express)} TND
                     </p>
                   </div>
 
