@@ -114,7 +114,7 @@ export const NavHeader = () => {
             />
           </form>
 
-          <Sheet>
+          <Sheet className="z-[9999999999]">
             <SheetTrigger>
               <AlignJustifyIcon
                 onClick={() => setDrawerOpen(true)}
