@@ -618,6 +618,10 @@ const getProducts = async (req, res) => {
       if (maxPrice !== undefined) query.price.$lte = Number(maxPrice);
     }
 
+    if (req.query.promo === 'true') {
+      query.oldPrice = { $exists: true, $ne: null };
+    }
+
     // Get total matching products
     const totalProducts = await Product.countDocuments(query);
 
