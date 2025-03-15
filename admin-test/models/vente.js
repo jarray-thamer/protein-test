@@ -34,6 +34,7 @@ const venteSchema = new Schema(
         quantity: Number,
         price: Number,
         oldPrice: Number,
+        variant: String,
       },
     ],
     tva: { type: Number },

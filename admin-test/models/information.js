@@ -47,6 +47,7 @@ const InformationSchema = new Schema({
     livraison: { type: Number },
     timber: { type: Number },
     tva: { type: Number },
+    lastVenteRef: { type: String}
   },
 });
 
