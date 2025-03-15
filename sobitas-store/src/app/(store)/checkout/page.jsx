@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useCartStore from "@/store/cart";
 import useInformationStore from "@/store/information";
+import axiosInstance from "@/lib/axios";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -117,18 +118,34 @@ export default function CheckoutPage() {
   };
 
   // Apply promo code
-  const handleApplyPromoCode = () => {
-    // This is a simple example - in a real app, you'd verify the code with the backend
-    if (formData.promoCode === "PROMO10") {
-      setPromoDiscount(cartTotalWithTVA * 0.1); // 10% discount
+  const handleApplyPromoCode = async () => {
+    try {
+      if (!formData.promoCode) {
+        alert("Please enter a promo code");
+        return;
+      }
+
+      const response = await axiosInstance.get(
+        `/promo-code/validate?code=${formData.promoCode}`
+      );
+      const data = await response.json();
+
+      if (!response.ok || !data.valid) {
+        throw new Error(data.message || "Invalid promo code");
+      }
+
+      // Calculate discount based on backend response
+      let discountAmount = 0;
+      if (response.data.valid) {
+        discountAmount = cartTotalWithTVA * data.discountValue;
+      }
+
+      setPromoDiscount(discountAmount);
       setPromoCodeApplied(true);
-    } else if (formData.promoCode === "BIENVENUE") {
-      setPromoDiscount(cartTotalWithTVA * 0.05); // 5% discount
-      setPromoCodeApplied(true);
-    } else {
+    } catch (error) {
       setPromoDiscount(0);
       setPromoCodeApplied(false);
-      alert("Code promo invalide");
+      alert(error.message || "Failed to apply promo code");
     }
   };
 
@@ -169,51 +186,47 @@ export default function CheckoutPage() {
         d17: "D17",
       };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/vente/new`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const response = await axiosInstance.post(`/vente/new`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: cart.map((item) => ({
+            type: "Product",
+            itemId: item._id, // Ensure cart items have _id from your product data
+            designation: item.designation,
+            quantity: item.quantity,
+            price: item.price,
+            oldPrice: item.oldPrice || null,
+            variant: item.selectedVariant?.title || "",
+          })),
+          client: {
+            name: formData.name,
+            email: formData.email,
+            phone1: formData.phone1,
+            phone2: formData.phone2,
+            address: formData.address,
+            ville: formData.city,
+            clientNote: formData.note,
           },
-          body: JSON.stringify({
-            items: cart.map((item) => ({
-              type: "Product",
-              itemId: item._id, // Ensure cart items have _id from your product data
-              designation: item.designation,
-              quantity: item.quantity,
-              price: item.price,
-              oldPrice: item.oldPrice || null,
-              variant: item.selectedVariant?.title || "",
-            })),
-            client: {
-              name: formData.name,
-              email: formData.email,
-              phone1: formData.phone1,
-              phone2: formData.phone2,
-              address: formData.address,
-              ville: formData.city,
-              clientNote: formData.note,
-            },
-            isNewClient: true,
-            promoCode: formData.promoCode,
-            livraison: shippingCost,
-            modePayment: paymentMethodMap[paymentMethod],
-            note: formData.note,
-          }),
-        }
-      );
+          isNewClient: true,
+          promoCode: formData.promoCode,
+          livraison: shippingCost,
+          modePayment: paymentMethodMap[paymentMethod],
+          note: formData.note,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to place order");
       }
 
-      const data = await response.json();
-      setOrderNumber(data.reference); // Use backend-generated reference
+      setOrderNumber(response.data.reference); // Use backend-generated reference
       setOrderPlaced(true);
       clearCart();
     } catch (error) {
-      console.error("Error submitting order:", error);
+      console.error("Error submitting order:", error.response?.data);
       alert(
         "Une erreur s'est produite lors de la soumission de votre commande. Veuillez réessayer."
       );
