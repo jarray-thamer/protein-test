@@ -49,8 +49,8 @@ export const NavHeader = () => {
   };
 
   return (
-    <div className="sticky top-0 w-full bg-white shadow-lg">
-      <div className="flex z-[9999999] items-center justify-between px-4 py-6 mx-auto text-black3 max-w-screen-2xl">
+    <div className="sticky z-[99999999999999999999] top-0 w-full bg-white shadow-lg">
+      <div className="flex z-[999999999999999999999] items-center justify-between px-4 py-6 mx-auto text-black3 max-w-screen-2xl">
         {/*logo and navigations*/}
         <div className="flex items-center space-x-8 text-sm uppercase">
           <Link href="/">
@@ -114,7 +114,7 @@ export const NavHeader = () => {
             />
           </form>
 
-          <Sheet className="z-[99999999999999999999]">
+          <Sheet className="z-[999999999999999999999999]">
             <SheetTrigger>
               <AlignJustifyIcon
                 onClick={() => setDrawerOpen(true)}
