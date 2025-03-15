@@ -241,6 +241,8 @@ const VenteForm = () => {
   };
 
   const onSubmit = async (values) => {
+    console.log(values);
+    
     try {
       if (id) {
         await updateVente(id, values);

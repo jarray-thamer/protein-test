@@ -447,9 +447,17 @@ const VenteView = () => {
                         {vente.discount > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">
-                              Promo Code {vente.promoCode && `(${vente.promoCode.discount * 100}%)`}
+                              Discount 
                             </span>
-                            <span className="text-red-600">-{formatCurrency(vente.discount)}</span>
+                            <span className="text-red-600">-{vente.discount}</span>
+                          </div>
+                        )}
+                        {vente.discount > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              Promo Code {vente.promoCode && `(${vente.promoCode.code })`}
+                            </span>
+                            <span className="text-red-600">-{vente.promoCode.discount * 100}%</span>
                           </div>
                         )}
                       </>
