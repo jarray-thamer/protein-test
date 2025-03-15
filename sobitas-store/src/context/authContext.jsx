@@ -1,4 +1,4 @@
-import { checkAuthStatus, logoutUser } from "@/helper/auth";
+import { checkAuthStatus, loginUser, logoutUser } from "@/helper/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
@@ -11,7 +11,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const data = await checkAuthStatus();
+        const token = Cookies.get("store-auth-token")
+        const data = await checkAuthStatus(token);
         setUser(data.user);
         setIsLoggedIn(true);
       } catch (error) {
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (data) => {
     const res = await loginUser(data);
     if (res.status === "ok" && res.user) {
+      Cookies.set("store-auth-token", res.user.token)
       setUser(res.user);
       setIsLoggedIn(true);
     }
@@ -35,10 +37,11 @@ export const AuthProvider = ({ children }) => {
     await logoutUser();
     setIsLoggedIn(false);
     setUser(null);
+    Cookies.remove("store-auth-token");
     window.location.reload();
   };
 
-  const value = { user, isLoggedIn, isLoading, logout };
+  const value = { user, isLoggedIn, isLoading, login, logout };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 

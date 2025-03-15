@@ -33,6 +33,7 @@ const ProductsPage = () => {
   const [isInitializing, setIsInitializing] = useState(true);
 
   // États pour les filtres, la pagination et le chargement
+  const [showPromoOnly, setShowPromoOnly] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
   const [tempValues, setTempValues] = useState([0, 1000]); // Valeurs temporaires du slider
@@ -151,7 +152,9 @@ const ProductsPage = () => {
       selectedSubCategories.forEach((designation) =>
         queryParams.append("subCategory", designation)
       );
-
+      if (showPromoOnly) {
+        queryParams.set("promo", "true");
+      }
       queryParams.set("minPrice", confirmedValues[0]);
       queryParams.set("maxPrice", confirmedValues[1]);
       queryParams.set("page", currentPage);
@@ -340,6 +343,21 @@ const ProductsPage = () => {
 
               {/* Filtre de Catégorie */}
               <div className="pb-4 border-b">
+                <div className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="promoFilter"
+                    checked={showPromoOnly}
+                    onChange={(e) => {
+                      setShowPromoOnly(e.target.checked);
+                      setCurrentPage(1); // Reset to first page when filter changes
+                    }}
+                    className="w-4 h-4 accent-black"
+                  />
+                  <label htmlFor="promoFilter" className="ml-2 text-gray-700">
+                    Produits en promotion
+                  </label>
+                </div>
                 <button
                   onClick={() => setIsCategoryOpen(!isCategoryOpen)}
                   className="flex items-center justify-between text-[18px] w-full pb-2 font-normal tracking-wide"

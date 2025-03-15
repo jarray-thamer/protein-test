@@ -70,7 +70,7 @@ export const NavHeader = () => {
           </Link>
           <Link
             className="items-center hidden ml-6 lg:flex hover:text-primary"
-            href={"/promo"}
+            href={"/products?promo=true"}
           >
             <h6>Promotion</h6>
           </Link>
