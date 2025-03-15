@@ -50,9 +50,9 @@ export const NavHeader = () => {
 
   return (
     <div className="sticky z-[99999999999999999999] top-0 w-full bg-white shadow-lg">
-      <div className="flex z-[999999999999999999999] items-center justify-between px-4 py-6 mx-auto text-black3 max-w-screen-2xl">
+      <div className="flex items-center justify-between px-4 py-6 mx-auto text-black3 max-w-screen-2xl">
         {/*logo and navigations*/}
-        <div className="flex items-center space-x-8 text-sm uppercase">
+        <div className="flex items-center z-[999999999999999999999] space-x-8 text-sm uppercase">
           <Link href="/">
             <Image
               src={information?.general?.logo?.url || "/logo.png"}
