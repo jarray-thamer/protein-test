@@ -121,7 +121,12 @@ exports.createVente = async (req, res) => {
     discount = discount.plus(req.body.additionalDiscount || 0)
     // Calculate net amount to pay
     const netAPayer = totalTTC.minus(discount);
-    const promoCodeObject = {id: promotionCode._id, code: promotionCode.code, value: promotionCode.discount}
+    let promoCodeObject
+    if(promoCode) {
+       promoCodeObject = {id: promotionCode._id, code: promotionCode.code, value: promotionCode.discount} ||""
+    } else {
+       promoCodeObject= "";
+    }
 
     // Create and save the Vente
     const vente = new Vente({
