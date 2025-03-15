@@ -178,6 +178,7 @@ exports.createVente = async (req, res) => {
 exports.validatePromoCode = async (req, res) => {
   try {
     const { code } = req.query;
+    console.log(code);
 
     if (!code) {
       return res.status(400).json({ message: "Promo code is required" });
@@ -185,7 +186,12 @@ exports.validatePromoCode = async (req, res) => {
 
     const promoCode = await PromoCode.findOne({ code });
 
-    if (!promoCode || !promoCode.isActive || promoCode.endDate < new Date()) {
+    if (
+      !promoCode ||
+      !promoCode.isActive ||
+      promoCode.endDate < new Date() ||
+      promoCode.startDate > new Date()
+    ) {
       return res
         .status(400)
         .json({ valid: false, message: "Invalid or expired promo code" });
