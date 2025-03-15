@@ -55,6 +55,7 @@ exports.createVente = async (req, res) => {
     let packDiscount = new Decimal(0);
     let discount = new Decimal(0);
     let totalTTC = new Decimal(0);
+    const taxRate = new Decimal(advancedInfo.advanced.tva || 0.19); // Example 20% VAT
 
     // Process each product
     for (const item of items) {
@@ -79,8 +80,7 @@ exports.createVente = async (req, res) => {
         const productTotal = currentPrice.times(item.quantity);
         totalHT = totalHT.plus(productTotal);
 
-        // Use proper TVA rate (replace advancedInfo.tva with your actual tax source)
-        const taxRate = new Decimal(advancedInfo.advanced.tva || 0.19); // Example 20% VAT
+        
         const productTva = currentPrice.times(taxRate).times(item.quantity);
         tva = tva.plus(productTva);
       } else if (item.type === "Pack") {
@@ -101,7 +101,7 @@ exports.createVente = async (req, res) => {
         const packTotal = currentPrice.times(item.quantity);
         totalHT = totalHT.plus(packTotal);
 
-        const taxRate = new Decimal(advancedInfo.advanced.tva || 0.19);
+        
         const packTva = currentPrice.times(taxRate).times(item.quantity);
         tva = tva.plus(packTva);
       }
@@ -110,6 +110,7 @@ exports.createVente = async (req, res) => {
     // Calculate total TTC
     totalTTC = totalHT
       .plus(tva)
+      .plus(req.body.additionalCharges || 0)
       .plus(livraisonCost)
       .plus(advancedInfo.advanced.timber);
 
@@ -117,7 +118,7 @@ exports.createVente = async (req, res) => {
     if (promotionCode?.isActive || promotionCode?.endDate > new Date()) {
       discount = discount.plus(totalTTC.times(promotionCode?.discount));
     }
-
+    discount = discount.plus(req.body.additionalDiscount || 0)
     // Calculate net amount to pay
     const netAPayer = totalTTC.minus(discount);
 
