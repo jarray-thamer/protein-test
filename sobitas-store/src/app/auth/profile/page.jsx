@@ -1,6 +1,7 @@
 "use client";
 
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+
+import ProtectedRoute from "@/components/auth/protectedRoute";
 import { useAuth } from "@/context/authContext";
 
 export default function ProfilePage() {
