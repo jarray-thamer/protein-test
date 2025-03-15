@@ -340,13 +340,23 @@ const VenteView = () => {
                 </div>
               </div>
             )}
+            {(vente.client?.clientNote ) && (
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex items-start gap-2">
+                <ClipboardIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
+                  <div>
+                    <div>{vente.client.clientNote}</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="border-t pt-4">
             <Button
               variant="outline"
               size="sm"
               className="w-full"
-              onClick={() => navigate(`/clients/${vente.client?.id}`)}
+              onClick={() => navigate(`/clients/${vente.client?._id}`)}
             >
               View Client Profile
             </Button>
@@ -432,15 +442,8 @@ const VenteView = () => {
                       <span>{formatCurrency(advancedData.timber || 0)}</span>
                     </div>
 
-                    {(vente.productsDiscount || vente.discount) && (
+                    {(vente.discount) && (
                       <>
-                        {vente.productsDiscount > 0 && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Product Discount</span>
-                            <span className="text-red-600">-{formatCurrency(vente.productsDiscount)}</span>
-                          </div>
-                        )}
-
                         {vente.discount > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">
@@ -451,9 +454,7 @@ const VenteView = () => {
                         )}
                       </>
                     )}
-
                     <Separator />
-
                     <div className="flex justify-between font-medium">
                       <span>Total</span>
                       <span className="text-lg">{formatCurrency(vente.netAPayer || 0)}</span>

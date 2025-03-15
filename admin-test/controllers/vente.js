@@ -50,9 +50,7 @@ exports.createVente = async (req, res) => {
     // Initialize values as Decimal.js instances
     let tva = new Decimal(0);
     let totalHT = new Decimal(0);
-    let livraisonCost = new Decimal(
-      req.body.livraison || advancedInfo.advanced.livraison || 0
-    );
+    let livraisonCost = new Decimal(req.body.livraison || 0);
     let productDiscount = new Decimal(0);
     let packDiscount = new Decimal(0);
     let discount = new Decimal(0);
