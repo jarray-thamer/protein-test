@@ -80,7 +80,6 @@ exports.createVente = async (req, res) => {
         const productTotal = currentPrice.times(item.quantity);
         totalHT = totalHT.plus(productTotal);
 
-        
         const productTva = currentPrice.times(taxRate).times(item.quantity);
         tva = tva.plus(productTva);
       } else if (item.type === "Pack") {
@@ -101,7 +100,6 @@ exports.createVente = async (req, res) => {
         const packTotal = currentPrice.times(item.quantity);
         totalHT = totalHT.plus(packTotal);
 
-        
         const packTva = currentPrice.times(taxRate).times(item.quantity);
         tva = tva.plus(packTva);
       }
@@ -118,14 +116,19 @@ exports.createVente = async (req, res) => {
     if (promotionCode?.isActive || promotionCode?.endDate > new Date()) {
       discount = discount.plus(totalTTC.times(promotionCode?.discount));
     }
-    discount = discount.plus(req.body.additionalDiscount || 0)
+    discount = discount.plus(req.body.additionalDiscount || 0);
     // Calculate net amount to pay
     const netAPayer = totalTTC.minus(discount);
-    let promoCodeObject
-    if(promoCode) {
-       promoCodeObject = {id: promotionCode._id, code: promotionCode.code, value: promotionCode.discount} ||""
+    let promoCodeObject;
+    if (promoCode) {
+      promoCodeObject =
+        {
+          id: promotionCode._id,
+          code: promotionCode.code,
+          value: promotionCode.discount,
+        } || "";
     } else {
-       promoCodeObject= "";
+      promoCodeObject = "";
     }
 
     // Create and save the Vente
@@ -162,7 +165,7 @@ exports.createVente = async (req, res) => {
 
     const savedVente = await vente.save();
 
-    res.status(201).json({ success: true });
+    res.status(201).json({ success: true, reference: savedVente.reference });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -261,7 +264,9 @@ exports.updateVente = async (req, res) => {
     // Initialize values
     let tva = new Decimal(0);
     let totalHT = new Decimal(0);
-    let livraisonCost = new Decimal(livraison || advancedInfo.advanced.livraison || 0);
+    let livraisonCost = new Decimal(
+      livraison || advancedInfo.advanced.livraison || 0
+    );
     let productDiscount = new Decimal(0);
     let packDiscount = new Decimal(0);
     let discount = new Decimal(0);
@@ -289,13 +294,19 @@ exports.updateVente = async (req, res) => {
       }
 
       const currentPrice = new Decimal(currentItem.price.toString());
-      const oldPrice = currentItem.oldPrice ? new Decimal(currentItem.oldPrice.toString()) : null;
+      const oldPrice = currentItem.oldPrice
+        ? new Decimal(currentItem.oldPrice.toString())
+        : null;
 
       if (oldPrice) {
         if (item.type === "Product") {
-          productDiscount = productDiscount.plus(oldPrice.minus(currentPrice).times(item.quantity));
+          productDiscount = productDiscount.plus(
+            oldPrice.minus(currentPrice).times(item.quantity)
+          );
         } else {
-          packDiscount = packDiscount.plus(oldPrice.minus(currentPrice).times(item.quantity));
+          packDiscount = packDiscount.plus(
+            oldPrice.minus(currentPrice).times(item.quantity)
+          );
         }
       }
 
@@ -311,7 +322,10 @@ exports.updateVente = async (req, res) => {
       .plus(livraisonCost)
       .plus(advancedInfo.advanced.timber);
 
-    if (promotionCode?.isActive || (promotionCode?.endDate && promotionCode.endDate > new Date())) {
+    if (
+      promotionCode?.isActive ||
+      (promotionCode?.endDate && promotionCode.endDate > new Date())
+    ) {
       discount = discount.plus(totalTTC.times(promotionCode.discount));
     }
     discount = discount.plus(additionalDiscount || 0);
@@ -320,7 +334,11 @@ exports.updateVente = async (req, res) => {
 
     // Construct promo code object
     let promoCodeObject = promotionCode
-      ? { id: promotionCode._id, code: promotionCode.code, value: promotionCode.discount }
+      ? {
+          id: promotionCode._id,
+          code: promotionCode.code,
+          value: promotionCode.discount,
+        }
       : "";
 
     // Update livreur with defaults
