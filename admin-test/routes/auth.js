@@ -19,7 +19,7 @@ const {
 const adminAuthRoutes = Router();
 
 // Admin auth routes
-adminAuthRoutes.get("/admin/check-auth-status", verifyToken, verifyAdminUser);
+adminAuthRoutes.get("/admin/check-auth-status/:token", verifyToken, verifyAdminUser);
 adminAuthRoutes.post("/admin/login", validate(adminLoginSchema), adminLogin);
 adminAuthRoutes.get("/admin/logout", verifyToken, adminLogout);
 

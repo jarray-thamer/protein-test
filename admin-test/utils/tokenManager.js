@@ -10,7 +10,7 @@ const createToken = (_id, role,  expiresIn) => {
 
 const verifyToken = async (req, res, next) => {
   try {
-    const token = req.body.token;
+    const token = req.params.token;
 
     if (!token || token.trim() === "") {
       return res.status(401).json({ message: "Token Not Received" });
