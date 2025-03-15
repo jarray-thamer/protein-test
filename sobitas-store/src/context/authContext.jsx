@@ -1,5 +1,6 @@
 import { checkAuthStatus, loginUser, logoutUser } from "@/helper/auth";
 import { createContext, useContext, useEffect, useState } from "react";
+import Cookies from 'js-cookie';
 
 const AuthContext = createContext(null);
 
