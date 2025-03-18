@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
-const Vente = require("../models/Vente");
 const {
   getTotalRevenueOverTime,
   getYearOverYearComparison,
   getCategoryPerformance,
   getPromoCodeUsageStats,
 } = require("../utils/statistique");
+const Vente = require("../models/Vente");
 
 const getTopSellingProducts = async (req, res) => {
   try {

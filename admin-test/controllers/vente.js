@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Vente = require("../models/Vente");
 const Pack = require("../models/pack");
 const Product = require("../models/Product");
 const Information = require("../models/information");
