@@ -8,7 +8,7 @@ const Decimal = require("decimal.js");
 
 const generateReference = require("../utils/generateReference");
 const PromoCode = require("../models/PromoCode");
-const Vente = require("../models/Vente");
+const Vente = require("../models/Vente.js");
 
 exports.createVente = async (req, res) => {
   try {
