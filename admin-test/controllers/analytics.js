@@ -5,13 +5,14 @@ const {
   getCategoryPerformance,
   getPromoCodeUsageStats,
 } = require("../utils/statistique");
-const Ventes = require("../models/Vente");
+// const Vente = require("../models/Vente");
+const Order = require("../models/Orders");
 
 const getTopSellingProducts = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 6;
 
-    const topProducts = await Ventes.aggregate([
+    const topProducts = await Order.aggregate([
       { $unwind: "$items" },
       { $match: { "items.type": "Product" } },
       {
