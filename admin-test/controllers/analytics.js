@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Vente = require("../models/vente");
+const Vente = require("../models/Vente");
 const {
   getTotalRevenueOverTime,
   getYearOverYearComparison,

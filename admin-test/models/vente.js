@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const venteSchema = new Schema(
+const VenteSchema = new Schema(
   {
     reference: { type: String },
     client: {
@@ -55,6 +55,6 @@ const venteSchema = new Schema(
   { timestamps: true }
 );
 
-const Vente = mongoose.models.Vente || mongoose.model("Vente", venteSchema);
+const Vente = mongoose.models.Vente || mongoose.model("Vente", VenteSchema);
 
 module.exports = Vente;

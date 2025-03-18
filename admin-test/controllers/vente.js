@@ -3,7 +3,7 @@ const Pack = require("../models/pack");
 const Product = require("../models/Product");
 const Information = require("../models/information");
 const Client = require("../models/Client");
-const Vente = require("../models/vente");
+const Vente = require("../models/Vente");
 
 const Decimal = require("decimal.js");
 
