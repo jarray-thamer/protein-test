@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Vente = require("../models/Vente");
+const Vente = require("../models/Vente.js");
 
 /**
  * Get total revenue over time with different time period options

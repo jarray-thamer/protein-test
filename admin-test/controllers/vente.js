@@ -8,8 +8,8 @@ const Decimal = require("decimal.js");
 
 const generateReference = require("../utils/generateReference");
 const PromoCode = require("../models/PromoCode");
-const Order = require("../models/Orders");
-// const Vente = require("../models/Vente");
+// const Order = require("../models/Orders");
+const Vente = require("../models/Vente.js");
 
 exports.createVente = async (req, res) => {
   try {
@@ -133,7 +133,7 @@ exports.createVente = async (req, res) => {
     }
 
     // Create and save the Vente
-    const vente = new Order({
+    const vente = new Vente({
       createdAt: new Date(req.body.createdAt),
       reference,
       client: {
