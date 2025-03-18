@@ -5,7 +5,7 @@ const {
   getCategoryPerformance,
   getPromoCodeUsageStats,
 } = require("../utils/statistique");
-const Vente = require("../models/Vente");
+const Vente = require("../models/Vente.js");
 
 const getTopSellingProducts = async (req, res) => {
   try {
