@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const Vente = require("../models/Vente.js");
 const Pack = require("../models/pack");
 const Product = require("../models/Product");
 const Information = require("../models/information");
@@ -9,6 +8,7 @@ const Decimal = require("decimal.js");
 
 const generateReference = require("../utils/generateReference");
 const PromoCode = require("../models/PromoCode");
+const Ventes = require("../models/Vente");
 
 exports.createVente = async (req, res) => {
   try {
@@ -132,7 +132,7 @@ exports.createVente = async (req, res) => {
     }
 
     // Create and save the Vente
-    const vente = new Vente({
+    const vente = new Ventes({
       createdAt: new Date(req.body.createdAt),
       reference,
       client: {

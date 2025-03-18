@@ -55,6 +55,6 @@ const VenteSchema = new Schema(
   { timestamps: true }
 );
 
-const Vente = mongoose.models.Vente || mongoose.model("Vente", VenteSchema);
+const Ventes = mongoose.models.Vente || mongoose.model("Vente", VenteSchema);
 
-module.exports = Vente;
+module.exports = Ventes;
