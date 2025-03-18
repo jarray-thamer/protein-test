@@ -71,7 +71,7 @@ const MilleurVente = () => {
         Découvrez les produits les plus populaires et les plus appréciés par nos
         clients !
       </motion.p>
-      <div className="flex flex-wrap items-center justify-center w-full gap-8 px-2 mx-auto mt-12 max-w-screen-2xl">
+      <div className="grid grid-cols-2 gap-4 px-4 mx-auto mt-12 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-8 max-w-screen-2xl">
         {productsData?.map((product, idx) => {
           return <ProductCard key={idx} user={user} product={product} />;
         })}

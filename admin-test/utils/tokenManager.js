@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const createToken = (_id, role,  expiresIn) => {
+const createToken = (_id, role, expiresIn) => {
   const payload = { _id, role };
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn,
@@ -43,7 +43,7 @@ const verifyToken = async (req, res, next) => {
 
 const clientVerifyToken = async (req, res, next) => {
   try {
-    const token = req.signedCookies[process.env.CLIENT_COOKIE_NAME];
+    const token = req.params.token;
 
     if (!token || token.trim() === "") {
       return res.status(401).json({ message: "Token Not Received" });

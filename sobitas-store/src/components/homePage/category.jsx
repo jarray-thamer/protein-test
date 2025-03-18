@@ -14,27 +14,31 @@ const CategorySection = () => {
     {
       title: "COMPLÉMENTS ALIMENTAIRES",
       img: "/categoryIcons/icon2.jpg",
-      href: "/products?category=COMPLÉMENTS ALIMENTAIRES",
+      href: `/products?category=${encodeURIComponent(
+        "COMPLÉMENTS ALIMENTAIRES"
+      )}`,
     },
     {
       title: "COMPLÉMENTS D'ENTRAÎNEMENT",
       img: "/categoryIcons/icon3.jpg",
-      href: "/products?category=COMPLÉMENTS D'ENTRAÎNEMENT",
+      href: `/products?category=${encodeURIComponent(
+        "COMPLÉMENTS D'ENTRAÎNEMENT"
+      )}`,
     },
     {
       title: "PERTE DE POIDS",
       img: "/categoryIcons/icon4.jpg",
-      href: "/products?category=",
+      href: `/products?category=${encodeURIComponent("PERTE DE POIDS")}`,
     },
     {
       title: "PROTÉINES",
       img: "/categoryIcons/icon5.jpg",
-      href: "/products?category=",
+      href: `/products?category=${encodeURIComponent("PROTÉINES")}`,
     },
     {
       title: "PRISE DE MASSE",
       img: "/categoryIcons/icon6.jpg",
-      href: "/products?category=",
+      href: `/products?category=${encodeURIComponent("PRISE DE MASSE")}`,
     },
   ];
 

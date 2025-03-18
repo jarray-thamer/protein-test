@@ -5,8 +5,10 @@ import { PhoneIcon, UserRoundIcon } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import NavHeader from "@/components/headers/navHeader";
+import { useIsLoggedIn } from "@/store/authStore";
 
 export const headers = ({ information }) => {
+  const isLoggedIn = useIsLoggedIn();
   return (
     <>
       <TopHeader />
@@ -23,21 +25,34 @@ export const headers = ({ information }) => {
             />
             <h6>CALL: {information?.general?.contact?.fax}</h6>
           </Link>
-
           <Link href="/contact-us" className="hover:text-primary">
             contact us
           </Link>
-          <Link
-            href={`/login`}
-            className="flex items-center justify-center space-x-1 hover:text-primary"
-          >
-            <UserRoundIcon
-              size={6}
-              strokeWidth={2}
-              className="size-[14px] 2xl:size-[16px] m-0 p-0"
-            />
-            <span>login</span>
-          </Link>
+          {!isLoggedIn ? (
+            <Link
+              href={`/auth/login`}
+              className="flex items-center justify-center space-x-1 hover:text-primary"
+            >
+              <UserRoundIcon
+                size={6}
+                strokeWidth={2}
+                className="size-[14px] 2xl:size-[16px] m-0 p-0"
+              />
+              <span>login</span>
+            </Link>
+          ) : (
+            <Link
+              href={`/auth/profile`}
+              className="flex items-center justify-center space-x-1 hover:text-primary"
+            >
+              <UserRoundIcon
+                size={6}
+                strokeWidth={2}
+                className="size-[14px] 2xl:size-[16px] m-0 p-0"
+              />
+              <span>Profile</span>
+            </Link>
+          )}
         </div>
         <Separator />
       </div>

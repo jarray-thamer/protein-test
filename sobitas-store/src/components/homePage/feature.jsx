@@ -40,7 +40,7 @@ const Feature = () => {
 
 const FeatureCard = ({ icon, title, description }) => {
   return (
-    <div className="flex gap-x-3">
+    <div className="flex transition-all duration-300 ease-out gap-x-3 hover:scale-110">
       {icon}
       <div className="flex flex-col">
         <h3 className="text-lg font-semibold capitalize text-black3">

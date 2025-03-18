@@ -19,22 +19,22 @@ const {
 const adminAuthRoutes = Router();
 
 // Admin auth routes
-adminAuthRoutes.get("/admin/check-auth-status/:token", verifyToken, verifyAdminUser);
+adminAuthRoutes.get(
+  "/admin/check-auth-status/:token",
+  verifyToken,
+  verifyAdminUser
+);
 adminAuthRoutes.post("/admin/login", validate(adminLoginSchema), adminLogin);
-adminAuthRoutes.get("/admin/logout", verifyToken, adminLogout);
+adminAuthRoutes.get("/admin/logout/:token", verifyToken, adminLogout);
 
 // Store auth routes
 adminAuthRoutes.get(
-  "/store/check-auth-status",
+  "/store/check-auth-status/:token",
   clientVerifyToken,
   verifyClient
 );
-adminAuthRoutes.get("/store/logout", clientVerifyToken, clientLogout);
+adminAuthRoutes.get("/store/logout/:token", clientVerifyToken, clientLogout);
 adminAuthRoutes.post("/store/login", validate(clientLoginSchema), clientLogin);
-adminAuthRoutes.post(
-  "/store/register",
-  validate(clientRegisterSchema),
-  clientRegister
-);
+adminAuthRoutes.post("/store/register", clientRegister);
 
 module.exports = adminAuthRoutes;

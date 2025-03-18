@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import ProductCard from "@/components/shared/productCard";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/authContext";
-import { getTopProductsFeature } from "@/services/products";
+import { getTopPromotionPacks } from "@/services/packs";
 
 const PackPromo = () => {
   const [productsData, setProductsData] = useState();
@@ -39,7 +39,7 @@ const PackPromo = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await getTopProductsFeature();
+        const response = await getTopPromotionPacks();
 
         setProductsData(response.data || []);
       } catch (err) {
@@ -71,9 +71,17 @@ const PackPromo = () => {
         Découvrez les meilleures offres et packs exclusifs disponibles dès
         maintenant !
       </motion.p>
-      <div className="flex flex-wrap items-center justify-center w-full gap-8 px-2 mx-auto mt-12 mb-28 max-w-screen-2xl">
+      <div className="grid grid-cols-2 gap-4 px-4 mx-auto mt-12 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-8 max-w-screen-2xl">
         {productsData?.map((product, idx) => {
-          return <ProductCard key={idx} user={user} product={product} />;
+          return (
+            <ProductCard
+              typeRef="packs"
+              type="pack"
+              key={idx}
+              user={user}
+              product={product}
+            />
+          );
         })}
       </div>
     </div>

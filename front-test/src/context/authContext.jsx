@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = Cookies.get("admin-auth-token")
+        const token = Cookies.get("admin-auth-token");
         const data = await checkAuthStatus(token);
         setUser(data.user);
         setIsLoggedIn(true);
@@ -31,16 +31,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (data) => {
     const res = await loginUser(data);
+
     if (res.status === "ok" && res.user) {
-      Cookies.set("admin-auth-token", res.user.token)
+      Cookies.set("admin-auth-token", res.user.token);
       setUser(res.user);
       setIsLoggedIn(true);
     }
     return res;
   };
 
-  const logout = async () => {
-    await logoutUser();
+  const logout = async (token) => {
+    await logoutUser(token);
     setIsLoggedIn(false);
     setUser(null);
     Cookies.remove("admin-auth-token");

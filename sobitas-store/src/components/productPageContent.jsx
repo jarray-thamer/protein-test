@@ -31,9 +31,10 @@ const ProductPageContent = () => {
   const categoryParam = searchParams.get("category");
   const searchQuery = searchParams.get("search"); // Extract search query from URL
   const [isInitializing, setIsInitializing] = useState(true);
+  const promo = searchParams.get("promo");
 
   // États pour les filtres, la pagination et le chargement
-  const [showPromoOnly, setShowPromoOnly] = useState(false);
+  const [showPromoOnly, setShowPromoOnly] = useState(promo);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
   const [tempValues, setTempValues] = useState([0, 1000]); // Valeurs temporaires du slider
@@ -117,6 +118,8 @@ const ProductPageContent = () => {
           setConfirmedValues([0, maxPriceValue]);
         }
 
+        setShowPromoOnly(promo === "true");
+
         // 3. Apply any URL parameters (like category filter)
         if (categoriesResponse.length > 0 && categoryParam) {
           const categoryExists = categoriesResponse.some(
@@ -137,7 +140,7 @@ const ProductPageContent = () => {
     };
 
     initializeData();
-  }, [categoryParam]); // Only depend on URL parameters
+  }, [categoryParam, promo]); // Only depend on URL parameters
 
   // Create an internal fetch function that doesn't depend on state
   const fetchProductsInternal = async () => {
@@ -288,7 +291,7 @@ const ProductPageContent = () => {
       {isMobile && (
         <button
           onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-          className="fixed z-[999999] flex items-center gap-2 px-4 py-2 text-white bg-primary bottom-4 right-4 rounded-2xl"
+          className="fixed z-[999999] flex items-center gap-2 px-4 py-2 text-white bg-primary bottom-28 right-4 rounded-2xl"
         >
           {isMobileFiltersOpen ? (
             <PanelLeftClose size={20} />
@@ -313,9 +316,9 @@ const ProductPageContent = () => {
               initial={isMobile ? { x: "-100%" } : {}}
               animate={isMobile ? { x: 0 } : {}}
               transition={{ type: "tween" }}
-              className={`w-full mt-20 md:w-1/4 px-6 ${
+              className={`w-full pt-4 md:w-1/4 px-6 ${
                 isMobile
-                  ? "fixed inset-0 z-20 bg-white h-screen overflow-y-auto"
+                  ? "fixed inset-0 z-[99999999999999] bg-white h-screen overflow-y-auto"
                   : "relative"
               }`}
             >
@@ -343,9 +346,9 @@ const ProductPageContent = () => {
               </div>
               <Separator className="my-6" />
 
-              {/* Filtre de Catégorie */}
-              <div className="pb-4 border-b">
-                <div className="flex items-center cursor-pointer">
+              <div className="pb-4 border-b ">
+                <label>Promo</label>
+                <div className="flex items-center mb-2 cursor-pointer">
                   <input
                     type="checkbox"
                     id="promoFilter"
@@ -356,7 +359,10 @@ const ProductPageContent = () => {
                     }}
                     className="w-4 h-4 accent-black"
                   />
-                  <label htmlFor="promoFilter" className="ml-2 text-gray-700">
+                  <label
+                    htmlFor="promoFilter"
+                    className="ml-2 text-gray-700 cursor-pointer"
+                  >
                     Produits en promotion
                   </label>
                 </div>
@@ -408,6 +414,50 @@ const ProductPageContent = () => {
                 </motion.div>
               </div>
 
+              {/* Filtre de Prix */}
+              <div className="pb-4 border-b">
+                <button
+                  onClick={() => setIsPriceOpen(!isPriceOpen)}
+                  className="flex items-center justify-between text-[18px] w-full pb-2 font-normal tracking-wide"
+                >
+                  Prix
+                  {isPriceOpen ? (
+                    <ChevronDownIcon size={18} />
+                  ) : (
+                    <ChevronUpIcon size={18} />
+                  )}
+                </button>
+                <motion.div
+                  animate={{
+                    height: isPriceOpen ? "auto" : 0,
+                    opacity: isPriceOpen ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.4, ease: "easeIn" }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-1 my-3 space-y-2">
+                    <p className="text-sm">
+                      Fourchette de prix:{" "}
+                      <span className="text-primary">
+                        {tempValues[0]} TND - {tempValues[1]} TND
+                      </span>
+                    </p>
+                    <Slider
+                      range
+                      min={0}
+                      max={maxPrice}
+                      value={tempValues}
+                      onChange={handleSliderChange}
+                    />
+                    <button
+                      onClick={handlePriceConfirm}
+                      className="w-full py-2 text-sm text-white transition-colors rounded-md bg-primary hover:bg-primary/90"
+                    >
+                      Confirmer la fourchette de prix
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
               {/* Filtre de Sous-Catégorie */}
               <div className="pb-4 border-b">
                 <button
@@ -462,51 +512,6 @@ const ProductPageContent = () => {
                           : "Veuillez sélectionner une catégorie pour voir les sous-catégories"}
                       </p>
                     )}
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Filtre de Prix */}
-              <div className="pb-4 border-b">
-                <button
-                  onClick={() => setIsPriceOpen(!isPriceOpen)}
-                  className="flex items-center justify-between text-[18px] w-full pb-2 font-normal tracking-wide"
-                >
-                  Prix
-                  {isPriceOpen ? (
-                    <ChevronDownIcon size={18} />
-                  ) : (
-                    <ChevronUpIcon size={18} />
-                  )}
-                </button>
-                <motion.div
-                  animate={{
-                    height: isPriceOpen ? "auto" : 0,
-                    opacity: isPriceOpen ? 1 : 0,
-                  }}
-                  transition={{ duration: 0.4, ease: "easeIn" }}
-                  className="overflow-hidden"
-                >
-                  <div className="my-3 space-y-2">
-                    <p className="text-sm">
-                      Fourchette de prix:{" "}
-                      <span className="text-primary">
-                        {tempValues[0]} TND - {tempValues[1]} TND
-                      </span>
-                    </p>
-                    <Slider
-                      range
-                      min={0}
-                      max={maxPrice}
-                      value={tempValues}
-                      onChange={handleSliderChange}
-                    />
-                    <button
-                      onClick={handlePriceConfirm}
-                      className="w-full py-2 text-sm text-white transition-colors rounded-md bg-primary hover:bg-primary/90"
-                    >
-                      Confirmer la fourchette de prix
-                    </button>
                   </div>
                 </motion.div>
               </div>
@@ -614,7 +619,7 @@ const ProductPageContent = () => {
 
           {/* Section des Produits */}
           <div
-            className={`flex-1 px-6 ${
+            className={`flex-1 px-2 md:px-4 ${
               isMobileFiltersOpen ? "hidden md:block" : ""
             }`}
           >
@@ -658,7 +663,7 @@ const ProductPageContent = () => {
               </div>
             ) : filteredProductsList.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 gap-6 mx-auto w-fit md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 px-4 mx-auto mt-12 md:grid-cols-3 lg:grid-cols-4 md:gap-8 max-w-screen-2xl">
                   {filteredProductsList.map((productData) => (
                     <ProductCard
                       key={productData.slug}

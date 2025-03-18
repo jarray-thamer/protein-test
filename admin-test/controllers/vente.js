@@ -133,6 +133,7 @@ exports.createVente = async (req, res) => {
 
     // Create and save the Vente
     const vente = new Vente({
+      createdAt: new Date(req.body.createdAt),
       reference,
       client: {
         id: clientId,

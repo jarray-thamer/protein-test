@@ -272,7 +272,7 @@ const PacksPage = () => {
               initial={isMobile ? { x: "-100%" } : {}}
               animate={isMobile ? { x: 0 } : {}}
               transition={{ type: "tween" }}
-              className={`w-full mt-20 md:w-1/4 px-6 ${
+              className={`w-full pt-32 md:w-1/4 px-6 ${
                 isMobile
                   ? "fixed inset-0 z-20 bg-white h-screen overflow-y-auto"
                   : "relative"
@@ -407,13 +407,14 @@ const PacksPage = () => {
               </div>
             ) : filteredPacksList.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 gap-6 mx-auto w-fit md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4 px-4 mx-auto mt-12 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-8 max-w-screen-2xl">
                   {filteredPacksList.map((packData) => (
                     <ProductCard
                       key={packData.slug}
+                      typeRef="packs"
                       user={user}
                       product={packData}
-                      type="packs" // Add a prop to distinguish packs from products
+                      type="pack" // Add a prop to distinguish packs from products
                     />
                   ))}
                 </div>

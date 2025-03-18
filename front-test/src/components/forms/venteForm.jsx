@@ -34,6 +34,7 @@ import {
 
 // Form schema remains unchanged
 const formSchema = z.object({
+  createdAt: z.coerce.date(),
   reference: z.string().optional(),
   clientId: z.string().optional(),
   client: z.object({
@@ -88,6 +89,7 @@ const VenteForm = () => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      createdAt: new Date().toISOString().split("T")[0], // Today's date in 'YYYY-MM-DD'
       reference: "",
       clientId: "",
       isNewClient: false,
@@ -155,13 +157,14 @@ const VenteForm = () => {
       const fetchVente = async () => {
         try {
           const venteData = await getVenteById(id);
-          console.log(venteData.data);
-
           if (!venteData.data) {
             throw new Error("Vente not found");
           }
-          const vente = venteData.data; // Assuming getVenteById returns { success: true, data: vente }
+          const vente = venteData.data;
           form.reset({
+            createdAt: vente.createdAt
+              ? new Date(vente.createdAt).toISOString().split("T")[0]
+              : "",
             reference: vente.reference || "",
             clientId: vente.client.id || "",
             isNewClient: !vente.client.id,
@@ -181,22 +184,20 @@ const VenteForm = () => {
             },
             items: vente.items.map((item) => ({
               type: item.type,
-              itemId: item?.itemId?._id || "", // Populated as full object, so use _id
+              itemId: item?.itemId?._id || "",
               quantity: item.quantity,
               price: item.price,
               oldPrice: item.oldPrice || 0,
               designation: item.designation,
             })),
-            additionalCharges: vente.additionalCharges || 0, // Assuming added to model
-            additionalDiscount: vente.discount || 0, // Mapping discount to additionalDiscount
+            additionalCharges: vente.additionalCharges || 0,
+            additionalDiscount: vente.discount || 0,
             livraison: vente.livraison || 0,
             modePayment: vente.modePayment || "CASH",
             status: vente.status || "pending",
             note: vente.note || "",
           });
         } catch (error) {
-          console.log(error);
-
           toast.error("Failed to load vente data");
         }
       };
@@ -242,7 +243,7 @@ const VenteForm = () => {
 
   const onSubmit = async (values) => {
     console.log(values);
-    
+
     try {
       if (id) {
         await updateVente(id, values);
@@ -403,7 +404,19 @@ const VenteForm = () => {
               <h3 className="text-lg font-medium text-primary">
                 Vente Details
               </h3>
-
+              <FormField
+                control={form.control}
+                name="createdAt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Created At</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="space-y-4">
                 {fields.map((field, index) => (
                   <div key={field.id} className="p-4 border rounded-lg">

@@ -6,38 +6,7 @@ import { getPacks } from "@/services/packs";
 
 const Packs = () => {
   const { user } = useAuth();
-  const [productsList, setProductsList] = useState([
-    {
-      designation: "Creatine monohydrate 500 Kg",
-      bestSellerSection: true,
-      description: "",
-      price: 230,
-      oldPrice: 270,
-      mainImage: {
-        url: "https://res.cloudinary.com/dqno8anj1/image/upload/v1738245383/products/main/jxz7vfwizzxbyukjchmt.jpg",
-        img_id: "products/main/jxz7vfwizzxbyukjchmt",
-      },
-      images: [],
-      inStock: true,
-      status: true,
-      features: ["new", "top"],
-      variant: [],
-      category: {
-        $oid: "67868bd1c633f2cd77508e56",
-      },
-      subCategory: [],
-      brand: "impact",
-      reviews: [],
-      createdAt: {
-        $date: "2025-01-30T13:56:24.438Z",
-      },
-      updatedAt: {
-        $date: "2025-01-30T13:56:24.438Z",
-      },
-      __v: 0,
-      slug: "creatine-monohydrate-500-kg",
-    },
-  ]);
+  const [productsList, setProductsList] = useState([]);
 
   useEffect(() => {
     const fetchProductList = async () => {

@@ -6,10 +6,10 @@ import Image from "next/image";
 
 const Footer = ({ information }) => {
   return (
-    <footer className="mx-auto w-screen text-white mt-2 mb-4 bg-[#222]">
+    <footer className="text-white mt-2 bg-[#222]">
       <div className="mx-auto max-w-screen-2xl">
         <div className="py-8">
-          <div className="container w-full px-4 mx-auto ">
+          <div className="container w-full px-4 mx-auto space-y-12">
             {/* subscribe */}
             <div className="mx-auto xl:w-1/2">
               <h1 className="font-bold uppercase ">Abonnez-vous</h1>
@@ -28,8 +28,8 @@ const Footer = ({ information }) => {
               </div>
             </div>
             {/*  */}
-            <Separator className="mb-4" />
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px,1fr,1fr]">
+            <Separator className="mb-4 " />
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[300px,1fr,1fr] space-y-10">
               {/* First Column: Brand / Description / Social */}
               <div className="w-fit">
                 <Image
@@ -38,7 +38,7 @@ const Footer = ({ information }) => {
                   height={1080}
                   alt="footer logo"
                 />
-                <p className="mt-2 mb-4 text-sm">
+                <p className="mt-4 mb-4 text-sm leading-6">
                   PROTEINE TUNISIE - SOBITAS : Votre Partenaire Nutrition &
                   Équipement Sportif en Tunisie Experts depuis 2010 – Boostez
                   vos performances avec des compléments certifiés (protéines ,
@@ -48,14 +48,16 @@ const Footer = ({ information }) => {
                   produits haute qualité, disponibles à Sousse et livrés en
                   Tunisie.
                   <br />
-                  <span className="font-bold">Email:</span>{" "}
-                  {information?.general?.contact?.email}
-                  <br />
-                  <span className="font-bold">Adresse:</span>{" "}
-                  {information?.general?.contact?.address}
-                  <br />
+                  <div className="mt-2 ">
+                    <span className="font-bold">Email:</span>{" "}
+                    {information?.general?.contact?.email}
+                    <br />
+                    <span className="mt-2 font-bold">Adresse:</span>{" "}
+                    {information?.general?.contact?.address}
+                    <br />
+                  </div>
                 </p>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-4 mt-6">
                   <a
                     href={information?.general?.social?.facebookUrl}
                     target="_blank"
@@ -171,7 +173,7 @@ const Footer = ({ information }) => {
               {/* Second Column: Footer Links and Description */}
               <div>
                 {/* Footer Links Container */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 ">
                   {/* Useful Links */}
                   <div className="w-fit">
                     <h3 className="mb-3 font-bold ">À propos de nous</h3>
@@ -179,23 +181,24 @@ const Footer = ({ information }) => {
                       <li>
                         <Link
                           className="transition-all duration-300 ease-in hover:text-primary"
-                          href="#"
+                          href="/pages/qui-somme-nous"
                         >
-                          Qui sommes-nous
+                          Qui somme-nous
                         </Link>
                       </li>
                       <li>
                         <Link
                           className="transition-all duration-300 ease-in hover:text-primary"
-                          href="#"
+                          href="/#nos-marques"
                         >
                           Nos marques
                         </Link>
                       </li>
                       <li>
                         <Link
+                          target="_blank"
                           className="transition-all duration-300 ease-in hover:text-primary"
-                          href="#"
+                          href="https://www.google.com/maps?ll=35.836358,10.629546&z=17&t=m&hl=fr&gl=TN&mapclient=embed&cid=5898273993463017996"
                         >
                           Site map
                         </Link>
@@ -219,7 +222,7 @@ const Footer = ({ information }) => {
                     </ul>
                   </div>
                   {/* Customer Service */}
-                  <div className="w-fit">
+                  <div className=" w-fit">
                     <h3 className="mb-3 font-bold ">Commande et livraison</h3>
                     <ul className="space-y-2 text-sm">
                       <li>
@@ -249,7 +252,7 @@ const Footer = ({ information }) => {
                     </ul>
                   </div>
                   {/* Services & Ventes */}
-                  <div className="w-fit">
+                  <div className="my-12 w-fit">
                     <h3 className="mb-3 font-bold ">Services & Ventes</h3>
                     <ul className="space-y-2 text-sm">
                       <li>
@@ -287,7 +290,7 @@ const Footer = ({ information }) => {
                     </ul>
                   </div>
                   {/* My Account */}
-                  <div className="w-fit">
+                  <div className="my-12 w-fit">
                     <h3 className="mb-3 font-bold ">Aide</h3>
                     <ul className="space-y-2 text-sm">
                       <li>
@@ -317,11 +320,10 @@ const Footer = ({ information }) => {
                     </ul>
                   </div>
                 </div>
-                {/* Subscribe */}
               </div>
 
               {/* Third Column: Map and App Links */}
-              <div className="flex flex-col lg:flex-row lg:space-x-4">
+              <div className="flex flex-col space-y-12 lg:flex-row lg:space-x-4">
                 <div className="w-full rounded-lg">
                   <iframe
                     src={
@@ -369,7 +371,9 @@ const Footer = ({ information }) => {
             <div className="flex flex-col border-t border-t-[#cccccc]/50 items-center pt-6 mt-10 ">
               <p className="mb-4 text-sm text-center uppercase sm:text-left sm:mb-0">
                 © {new Date().getFullYear()}
-                <span className="mx-1 text-primary">Proteine Tunisie</span>
+                <a href={"/#top"} className="mx-1 text-primary">
+                  Proteine Tunisie
+                </a>
               </p>
               <div className="flex flex-col items-center space-y-3 sm:flex-row sm:space-y-0 sm:space-x-6">
                 <div className="flex items-center text-sm ">

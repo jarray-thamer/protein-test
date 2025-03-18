@@ -2,19 +2,28 @@
 
 import Image from "next/image";
 import { Rate } from "antd";
-import { ShoppingCart } from "lucide-react";
-import { useState } from "react";
-import { HeartFilled, HeartOutlined } from "@ant-design/icons";
+import { ShoppingCart, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/formattedPrice";
 import { cn } from "@/lib/utils";
 import useCartStore from "@/store/cart";
 import CountdownTimer from "./countDown";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const ProductCard = ({ user, product, type = "products" }) => {
+const ProductCard = ({
+  key,
+  user,
+  product,
+  type = "products",
+  typeRef = "products",
+}) => {
   const addToCart = useCartStore((state) => state.addToCart);
-  const [wishlistHover, setWishlistHover] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const isMobile = useIsMobile();
 
   // Calculate reviews count and average rating
   const reviewsCount = product?.reviews?.length || 0;
@@ -27,157 +36,208 @@ const ProductCard = ({ user, product, type = "products" }) => {
       ? Math.round((totalRating / reviewsCount) * 2) / 2 // Rounds to nearest 0.5
       : 0;
 
-  const handleWishlist = (wishlistProduct) => {
-    console.log("wishlist product", wishlistProduct);
-    if (user) {
-      console.log("user: " + user._id);
-    } else {
-      alert("Veuillez vous connecter pour ajouter ce produit à votre panier.");
+  // Check if product is in wishlist on component mount
+  useEffect(() => {
+    // This would be replaced with actual wishlist check logic
+    // For now, just a placeholder
+    const checkWishlist = async () => {
+      if (user) {
+        // Example: const inWishlist = await checkIfInWishlist(user._id, product._id);
+        // setIsInWishlist(inWishlist);
+      }
+    };
+
+    checkWishlist();
+  }, [user, product]);
+
+  const handleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      toast({
+        title: "Connexion requise",
+        description:
+          "Veuillez vous connecter pour ajouter ce produit à votre liste de souhaits.",
+        variant: "destructive",
+      });
+      return;
     }
+
+    // Toggle wishlist state
+    setIsInWishlist(!isInWishlist);
+
+    // Here you would add API call to update wishlist in backend
+    console.log("Wishlist toggled for product", product?._id);
+
+    toast({
+      title: isInWishlist ? "Retiré des favoris" : "Ajouté aux favoris",
+      description: isInWishlist
+        ? "Le produit a été retiré de votre liste de souhaits."
+        : "Le produit a été ajouté à votre liste de souhaits.",
+      variant: "default",
+    });
+  };
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!product?.inStock) return;
+
+    addToCart({
+      ...product,
+      type: type === "pack" ? "Pack" : "Product",
+    });
+
+    toast({
+      title: "Produit ajouté",
+      description: "Le produit a été ajouté à votre panier.",
+      variant: "default",
+    });
   };
 
   return (
-    <div className="relative flex flex-col h-full bg-white group">
+    <div
+      className={cn(
+        "relative flex flex-col h-full bg-white rounded-md overflow-hidden border transition-all duration-300 hover:border-primary/20 hover:shadow-lg group"
+      )}
+    >
+      {type === "pack" && (
+        <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden">
+          <div className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 rotate-45 bg-[#A786DF] text-white py-1 px-10 text-xs font-medium shadow-md">
+            Pack
+          </div>
+        </div>
+      )}
+
+      {/* Badges */}
+      <div className="absolute z-20 space-y-1 text-white top-4 left-4">
+        {product?.oldPrice !== 0 && (
+          <span className="py-1 px-2 text-xs font-medium bg-[#ef837b] rounded-sm block">
+            Promo
+          </span>
+        )}
+        {type === "pack" && (
+          <span className="py-1 px-2 text-xs font-medium bg-[#A786DF] rounded-sm block">
+            Pack
+          </span>
+        )}
+      </div>
+
       <Link
-        className="cursor-pointer"
-        href={`/${type}/${product?.slug}`}
-        passHref
+        href={`/${typeRef}/${product?.slug}`}
+        className="flex flex-col flex-1 h-full"
       >
-        {/* Sale Badge */}
-        <div className="space-y-1 absolute top-4 left-4 text-white p-1 text-[13px] z-20">
+        {/* Image container - increased height */}
+        <div className="relative flex items-center justify-center h-40 p-2 sm:p-4 sm:h-44 md:h-64 bg-gray-50">
+          {/* Out of stock banner - centered on image */}
           {!product?.inStock && (
-            <h1
-              className={cn("py-[5px] px-[9px] w-fit capitalize bg-[#8C8C8C]")}
-            >
-              Rupture de Stock
-            </h1>
+            <div className="absolute inset-0 z-30 flex items-center justify-center">
+              <div className="w-full px-4 py-1 text-sm font-medium text-center text-white shadow-md bg-primary md:text-base">
+                Rupture de Stock
+              </div>
+            </div>
           )}
-          {product?.oldPrice !== 0 && (
-            <h1
-              className={cn("py-[5px] px-[9px] w-fit capitalize bg-[#ef837b]")}
-            >
-              Promo
-            </h1>
+
+          <div
+            className={cn(
+              "transition-opacity duration-300 h-full w-full flex items-center justify-center",
+              isImageLoaded ? "opacity-100" : "opacity-0",
+              !product?.inStock && "opacity-40" // Lower opacity when out of stock
+            )}
+          >
+            <Image
+              className={cn(
+                "object-contain h-full w-auto max-w-full transition-all duration-300 group-hover:scale-105",
+                "mx-auto" // Center the image horizontally
+              )}
+              src={product?.mainImage?.url.toString() || "/placeholder.svg"}
+              alt={product?.designation || "Product image"}
+              width={1880}
+              height={1040}
+              onLoad={() => setIsImageLoaded(true)}
+              priority={false}
+            />
+          </div>
+          {!isImageLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 border-2 rounded-full sm:w-12 sm:h-12 border-primary/30 border-t-primary animate-spin"></div>
+            </div>
           )}
-          {type === "pack" && (
-            <h1
-              className={cn("py-[5px] px-[9px] w-fit capitalize bg-[#A786DF]")}
-            >
-              Pack
-            </h1>
-          )}
+        </div>
+
+        {/* Product details - fixed height sections for consistent layout */}
+        <div className="flex flex-col flex-1 px-2 pt-4 text-center sm:px-4 sm:pt-6">
+          {/* Brand - fixed height */}
+          <div className="h-5 mb-1">
+            {product?.brand ? (
+              <span className="text-xs text-gray-500 uppercase">
+                {product.brand}
+              </span>
+            ) : null}
+          </div>
+
+          {/* Product name - fixed height */}
+          <div className="h-12 mb-2">
+            <h3 className="text-sm font-medium text-center transition-colors sm:text-base line-clamp-2 group-hover:text-primary">
+              {product?.designation}
+            </h3>
+          </div>
+
+          {/* Price section - fixed height */}
+          <div className="flex flex-col items-center justify-center h-16 mb-2">
+            <span className="text-base font-semibold text-[#EF837B]">
+              {formatCurrency(product?.price + product?.price * 0.19)}
+            </span>
+            <div className="flex items-center justify-center h-6">
+              {product?.oldPrice !== 0 ? (
+                <span className="mt-1 text-sm text-gray-400 line-through">
+                  {formatCurrency(product?.oldPrice)}
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Ratings - fixed height */}
+          <div className="flex items-center justify-center h-6 mb-2">
+            <Rate
+              value={averageRating}
+              disabled
+              allowHalf
+              className="text-xs sm:text-sm custom-rate"
+            />
+            <span className="ml-2 text-xs text-gray-400">({reviewsCount})</span>
+          </div>
+
+          {/* Flash sale timer - fixed height container */}
+          <div className="flex items-center justify-center h-8">
+            {product?.features?.includes("vente-flash") &&
+              product?.venteflashDate && (
+                <CountdownTimer targetDate={product.venteflashDate} />
+              )}
+          </div>
         </div>
       </Link>
 
-      <div className="flex flex-col flex-1 p-4 transition-transform duration-300 ease-in-out transform cursor-pointer group-hover:shadow-lg">
-        <Link
-          href={`/${type}/${product?.slug}`}
-          passHref
-          className="flex flex-col flex-1"
+      {/* Add to cart button - always visible */}
+      <div className="p-2 pt-0 sm:p-4">
+        <Button
+          onClick={handleAddToCart}
+          disabled={!product?.inStock}
+          className={cn(
+            "w-full gap-2 transition-all duration-300",
+            !product?.inStock
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed hover:bg-gray-200"
+              : "bg-primary hover:bg-primary/90"
+          )}
+          size="sm"
         >
-          {/* Image container */}
-          <div className="relative h-64 cursor-pointer">
-            <Image
-              className="object-contain w-full h-full mx-auto transition-all duration-300 group-hover:scale-110"
-              src={product?.mainImage?.url.toString()}
-              alt={product?.designation || ""}
-              width={240}
-              height={240}
-            />
-          </div>
-
-          {/* Text content */}
-          <div className="w-full mt-3 text-center bg-white flex-1 min-h-[120px] flex flex-col">
-            <div className="flex-1 pb-6">
-              <h6 className="text-[#777777] capitalize text-[13px] mb-2">
-                {product?.brand || <br />}
-              </h6>
-              <h4 className="mb-2 text-base transition-colors duration-200 text-black3 hover:text-primary line-clamp-2">
-                {product?.designation}
-              </h4>
-              <div className="mb-[8px]">
-                <span className="text-base text-[#EF837B] mr-2">
-                  {formatCurrency(product?.price + product?.price * 0.19)}
-                </span>
-                {product?.oldPrice !== 0 && (
-                  <span className={cn("text-base text-[#CCCCCC] line-through")}>
-                    {formatCurrency(product?.oldPrice)}
-                  </span>
-                )}
-              </div>
-              <Rate
-                value={averageRating}
-                disabled
-                allowHalf
-                className="mr-2 custom-rate"
-              />
-              <span className="text-[#CCCCCC] text-[13px]">
-                ({reviewsCount} {reviewsCount === 1 ? "Review" : "Reviews"})
-              </span>
-              {/* Timer */}
-              <div>
-                {product?.features?.includes("vente-flash") &&
-                  product?.venteflashDate && (
-                    <CountdownTimer targetDate={product.venteflashDate} />
-                  )}
-              </div>
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Enhanced Add to Cart and Wishlist Section */}
-      <div className="absolute bottom-0 left-0 right-0 z-[99999] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <div className="px-4 pb-4 space-y-3 text-center shadow-lg pointer-events-auto bg-white/90 backdrop-blur-sm">
-          <button
-            disabled={!product?.inStock}
-            onClick={(e) => {
-              e.preventDefault();
-              addToCart({
-                ...product,
-                type: type === "pack" ? "Pack" : "Product",
-              });
-            }}
-            className={cn(
-              "uppercase w-full text-primary border border-primary group/cart flex items-center justify-center py-2 space-x-2.5 transition-all duration-200 ease-in-out",
-              !product?.inStock
-                ? "cursor-not-allowed opacity-50 text-gray-400 border-gray-400 hover:bg-gray-400 hover:text-white"
-                : "hover:text-white hover:bg-primary"
-            )}
-          >
-            <ShoppingCart
-              className={cn(
-                "transition-transform duration-200 size-4 group-hover/cart:scale-110"
-              )}
-              strokeWidth={2}
-            />
-            <span className="text-center capitalize">
-              Ajouter <span className="lowercase">au</span> Panier
-            </span>
-          </button>
-
-          <div
-            onMouseEnter={() => setWishlistHover(true)}
-            onMouseLeave={() => setWishlistHover(false)}
-            onClick={() => setIsInWishlist(!isInWishlist)}
-            className="group/wishlist text-[#666666] text-base cursor-pointer font-light flex items-center justify-center space-x-2 transition-colors duration-200 hover:text-primary"
-          >
-            <span className="transition-transform duration-200 ease-in-out transform group-hover/wishlist:scale-110">
-              {wishlistHover ? (
-                <HeartOutlined className="text-primary" />
-              ) : isInWishlist ? (
-                <HeartFilled className="text-primary" />
-              ) : (
-                <HeartOutlined />
-              )}
-            </span>
-            <span>
-              {isInWishlist
-                ? "Remove from Wishlist"
-                : "Ajouter à la liste de souhaits"}
-            </span>
-          </div>
-        </div>
+          <ShoppingCart className="size-4" />
+          <span className="text-xs sm:text-sm">
+            {product?.inStock ? "Ajouter au panier" : "Indisponible"}
+          </span>
+        </Button>
       </div>
     </div>
   );

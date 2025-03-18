@@ -45,7 +45,6 @@ export default function CheckoutPage() {
     phone2: "",
     city: "",
     address: "",
-    postalCode: "",
     note: "",
     promoCode: "",
   });
@@ -432,16 +431,6 @@ export default function CheckoutPage() {
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="postalCode">Code postal</Label>
-                  <Input
-                    id="postalCode"
-                    name="postalCode"
-                    value={formData.postalCode}
-                    onChange={handleInputChange}
-                    placeholder="Entrez votre code postal"
-                  />
-                </div>
               </div>
 
               <div className="mb-6">
@@ -518,7 +507,7 @@ export default function CheckoutPage() {
                   </p>
                 </div>
 
-                <div
+                {/* <div
                   className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                     paymentMethod === "bankTransfer"
                       ? "border-primary bg-primary/5"
@@ -565,7 +554,7 @@ export default function CheckoutPage() {
                     <span className="font-medium">D17</span>
                   </div>
                   <p className="text-sm text-gray-500">Paiement mobile</p>
-                </div>
+                </div> */}
               </div>
             </div>
 

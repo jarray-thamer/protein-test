@@ -201,7 +201,7 @@ const ProductDetail = ({ item, relatedItems, type }) => {
         {/* Product info */}
         <div className="flex flex-col justify-between w-full md:w-fit">
           <div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-start justify-between space-y-2 md:flex-row">
               <h1 className="mb-1 text-3xl font-bold">{item.designation}</h1>
               <h1>
                 {item?.inStock ? (
@@ -305,7 +305,7 @@ const ProductDetail = ({ item, relatedItems, type }) => {
                 <span>Acheter</span>
               </button>
 
-              <WishlistButton item={item} />
+              {/* <WishlistButton item={item} /> */}
             </div>
 
             {/* Categories */}
@@ -331,9 +331,15 @@ const ProductDetail = ({ item, relatedItems, type }) => {
           <h3 className="mb-8 text-2xl font-semibold text-center">
             You May Also Like
           </h3>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 px-4 mx-auto mt-12 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-8 max-w-screen-2xl">
             {relatedItems.slice(0, 4).map((item, i) => (
-              <ProductCard type={type} key={i} user={user} product={item} />
+              <ProductCard
+                typeRef="packs"
+                type={type}
+                key={i}
+                user={user}
+                product={item}
+              />
             ))}
           </div>
         </div>

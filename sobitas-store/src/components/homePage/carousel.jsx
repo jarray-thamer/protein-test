@@ -1,5 +1,4 @@
 "use client";
-import axiosInstance from "@/lib/axios";
 import { getSlides } from "@/services/information";
 import { Carousel } from "antd";
 import Image from "next/image";
@@ -28,6 +27,7 @@ const HeroSectionCarousel = () => {
 
   return (
     <Carousel
+      id="top"
       className="w-full h-[400px] md:h-screen"
       arrows
       {...carouselSettings}

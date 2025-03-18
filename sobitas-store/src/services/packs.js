@@ -14,3 +14,10 @@ export async function getPackBySlug(slug) {
   );
   return res.data;
 }
+
+export async function getTopPromotionPacks() {
+  const res = await axiosInstance.get(
+    "/pack/get/store/get/top-promotion-packs"
+  );
+  return res.data;
+}

@@ -23,8 +23,8 @@ export const checkAuthStatus = async (token) => {
 };
 
 // logout the user
-export const logoutUser = async () => {
-  const res = await axios.get("/admin/auth/admin/logout");
+export const logoutUser = async (token) => {
+  const res = await axios.get(`/admin/auth/admin/logout/${token}`);
   if (res.status !== 200) {
     console.log("Unable to logout");
   }

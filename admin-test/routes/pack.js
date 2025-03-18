@@ -9,6 +9,7 @@ const {
   getPackById,
   getPackList,
   getPackBySlug,
+  getPacksWithPromo,
 } = require("../controllers/pack");
 const { uploadProductImages } = require("../middleware/multer");
 
@@ -22,5 +23,6 @@ AdminPackRouter.delete("/delete/:id", deletePack);
 AdminPackRouter.post("/delete/many", deletePacksInBulk);
 AdminPackRouter.put("/update/:id", uploadProductImages, updatePack);
 AdminPackRouter.get("/get/store/packs/get-by-slug/:slug", getPackBySlug);
+AdminPackRouter.get("/get/store/get/top-promotion-packs", getPacksWithPromo);
 
 module.exports = AdminPackRouter;

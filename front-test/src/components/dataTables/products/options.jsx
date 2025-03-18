@@ -19,6 +19,11 @@ export const featureOptions = [
     label: "Materiel de Musculation",
     value: "materiel-de-musculation",
   },
+  {
+    id: "5",
+    label: "Top Promotion",
+    value: "Top Promotion",
+  },
 ];
 
 export const publicOptions = [

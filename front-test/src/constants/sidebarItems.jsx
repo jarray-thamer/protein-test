@@ -3,6 +3,7 @@ import {
   BookTextIcon,
   LayersIcon,
   MailsIcon,
+  NewspaperIcon,
   Package2Icon,
   Settings2,
   ShoppingBagIcon,
@@ -60,6 +61,11 @@ export const SIDEBAR_ITEMS = {
       title: "Messages",
       url: "/messages",
       icon: MailsIcon,
+    },
+    {
+      title: "Pages",
+      url: "/pages",
+      icon: NewspaperIcon,
     },
     {
       title: "Website Settings",

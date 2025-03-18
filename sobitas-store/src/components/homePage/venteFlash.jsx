@@ -48,7 +48,7 @@ const VenteFlash = () => {
   };
   return (
     <div className="w-full py-8 mx-auto mt-24 bg-gray-100">
-      <div className="mx-auto  max-w-screen-2xl">
+      <div className="mx-auto max-w-screen-2xl">
         <motion.h3
           variants={fadeInVariants} // Apply the variants
           initial="hidden" // Initial state
@@ -67,7 +67,7 @@ const VenteFlash = () => {
         >
           Des offres exclusives à durée limitée – ne les laissez pas passer !
         </motion.p>
-        <div className="flex flex-wrap items-center justify-center w-full gap-8 px-2 mx-auto mt-12 max-w-screen-2xl">
+        <div className="grid grid-cols-2 gap-4 px-4 mx-auto mt-12 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-8 max-w-screen-2xl">
           {productsData?.map((product, idx) => {
             return <ProductCard key={idx} user={user} product={product} />;
           })}

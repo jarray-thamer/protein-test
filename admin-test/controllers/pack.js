@@ -491,6 +491,112 @@ const getPackBySlug = async (req, res) => {
   }
 };
 
+const getPacksWithPromo = async (req, res) => {
+  try {
+    // Find packs where features array contains "Packs en Promo"
+    const packs = await Pack.find({
+      features: { $elemMatch: { $regex: /packs en promo/i } },
+      status: true,
+    }).select({
+      // Include only these fields
+      designation: 1,
+      slug: 1,
+      smallDescription: 1,
+      price: 1,
+      oldPrice: 1,
+      "mainImage.url": 1, // Only include URL from mainImage
+      "images.url": 1, // Only include URL from images
+      inStock: 1,
+      features: 1,
+      products: 1,
+      rate: 1,
+      reviews: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      venteflashDate: 1,
+      __v: 1,
+
+      // Explicitly exclude sensitive fields
+      _id: 0,
+    });
+
+    // Check if any packs were found
+    if (packs.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No packs with 'Packs en Promo' feature found",
+      });
+    }
+
+    // Return packs
+    return res.status(200).json({
+      success: true,
+      count: packs.length,
+      data: packs,
+    });
+  } catch (error) {
+    console.error("Error fetching promo packs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+const getPacksWithTopPromo = async (req, res) => {
+  try {
+    // Find packs where features array contains "Packs en Promo"
+    const packs = await Pack.find({
+      features: { $elemMatch: { $regex: /top promotion/i } },
+      status: true,
+    }).select({
+      // Include only these fields
+      designation: 1,
+      slug: 1,
+      smallDescription: 1,
+      price: 1,
+      oldPrice: 1,
+      "mainImage.url": 1, // Only include URL from mainImage
+      "images.url": 1, // Only include URL from images
+      inStock: 1,
+      features: 1,
+      products: 1,
+      rate: 1,
+      reviews: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      venteflashDate: 1,
+      __v: 1,
+
+      // Explicitly exclude sensitive fields
+      _id: 0,
+    });
+
+    // Check if any packs were found
+    if (packs.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No packs with 'Packs en Promo' feature found",
+      });
+    }
+
+    // Return packs
+    return res.status(200).json({
+      success: true,
+      count: packs.length,
+      data: packs,
+    });
+  } catch (error) {
+    console.error("Error fetching promo packs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createPack,
   updatePack,
@@ -500,4 +606,6 @@ module.exports = {
   deletePacksInBulk,
   getAllPacks,
   getPackBySlug,
+  getPacksWithPromo,
+  getPacksWithTopPromo,
 };

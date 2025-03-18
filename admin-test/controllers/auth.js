@@ -91,6 +91,8 @@ const adminLogout = async (req, res, next) => {
 const verifyClient = async (req, res) => {
   try {
     const { _id } = res.locals.jwtData;
+    console.log(_id);
+
     const client = await Client.findById(_id);
     if (!client) {
       return res
@@ -148,21 +150,56 @@ const clientLogin = async (req, res) => {
   }
 };
 
-// Client registration function
+// Client registration function - updated to handle guest to registered user conversion
 const clientRegister = async (req, res) => {
   try {
     const { name, email, password, phone1, ville, address } = req.body;
 
     // Check if user already exists
     const existingClient = await Client.findOne({ email });
+
     if (existingClient) {
-      return res.status(400).json({ message: "Email already registered" });
+      // If user exists but is a guest, convert them to a registered user
+      if (existingClient.isGuest) {
+        // Update the guest user with registration info
+        existingClient.name = name;
+        existingClient.password = await hash(password, 10);
+        existingClient.phone1 = phone1;
+        existingClient.ville = ville;
+        existingClient.address = address;
+        existingClient.isGuest = false;
+
+        await existingClient.save();
+
+        // Create and set token
+        const token = createToken(
+          existingClient._id.toString(),
+          "client",
+          "30d"
+        );
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 30);
+
+        // Remove password from client object before sending
+        const clientObj = existingClient.toObject();
+        delete clientObj.password;
+
+        return res.status(200).json({
+          status: "ok",
+          message:
+            "Registered successfully. Previous guest orders have been linked to your account.",
+          user: clientObj,
+          token,
+        });
+      } else {
+        // If user exists and is not a guest, return error
+        return res.status(400).json({ message: "Email already registered" });
+      }
     }
 
-    // Hash password
+    // If no existing user, create new client
     const hashedPassword = await hash(password, 10);
 
-    // Create new client
     const newClient = new Client({
       name,
       email,

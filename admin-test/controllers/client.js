@@ -620,7 +620,7 @@ exports.getClientById = async (req, res) => {
       .populate("wishlist"); // Populate wishlist (references "Product")
 
     // Check if client exists
-    if (!client.email) {
+    if (!client) {
       return res.status(404).json({ message: "Client not found" });
     }
 

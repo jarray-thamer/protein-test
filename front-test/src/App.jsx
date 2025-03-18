@@ -35,6 +35,7 @@ import ClientView from "./components/client/clientView";
 import BrandsManagement from "./components/forms/brandsForm";
 import { MessagesList } from "./pages/adminView/messages";
 import { ProtectedRoute } from "./components/protectedRoute";
+import BarcodeScanner from "./components/scanBarCode";
 
 function App() {
   return (
@@ -112,6 +113,7 @@ function App() {
             <Route path="/blogs/view/:id" element={<BlogView />} />
             {/* Messages routes */}
             <Route path="/messages" element={<MessagesList />} />
+            <Route path="/scan" element={<BarcodeScanner />} />
           </Route>
           <Route path="*" element={<h1>Not found</h1>} />
         </Routes>
