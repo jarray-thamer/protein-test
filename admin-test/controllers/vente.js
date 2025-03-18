@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
-const Pack = require("../models/pack");
-const Product = require("../models/Product");
-const Information = require("../models/information");
-const Client = require("../models/Client");
+const Pack = require("../models/pack.js");
+const Product = require("../models/Product.js");
+const Information = require("../models/information.js");
+const Client = require("../models/Client.js");
 
 const Decimal = require("decimal.js");
 
-const generateReference = require("../utils/generateReference");
-const PromoCode = require("../models/PromoCode");
+const generateReference = require("../utils/generateReference.js");
+const PromoCode = require("../models/PromoCode.js");
 // const Order = require("../models/Orders");
-const Vente = require("../models/Vente.js");
+const Vente = require("../models/Ventes.js");
 
 exports.createVente = async (req, res) => {
   try {
