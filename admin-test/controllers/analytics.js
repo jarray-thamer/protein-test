@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Vente = require("../models/Vente");
 const {
   getTotalRevenueOverTime,
