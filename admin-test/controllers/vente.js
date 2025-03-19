@@ -8,7 +8,6 @@ const Decimal = require("decimal.js");
 
 const generateReference = require("../utils/generateReference.js");
 const PromoCode = require("../models/PromoCode.js");
-// const Order = require("../models/Orders");
 const Vente = require("../models/Ventes.js");
 
 exports.createVente = async (req, res) => {
@@ -157,6 +156,7 @@ exports.createVente = async (req, res) => {
       totalTTC: totalTTC.toFixed(3),
       livraison: livraisonCost.toFixed(3),
       discount: discount.toFixed(3) || 0,
+      additionalCharges: req.body.additionalCharges.toFixed(3),
       productsDiscount: productDiscount.toFixed(3),
       netAPayer: netAPayer.toFixed(3),
       note: req.body.note || "",
@@ -165,7 +165,7 @@ exports.createVente = async (req, res) => {
       promoCode: promoCodeObject || "",
     });
 
-    const savedVente = await Order.save();
+    const savedVente = await vente.save();
 
     res.status(201).json({ success: true, reference: savedVente.reference });
   } catch (error) {
@@ -216,7 +216,7 @@ exports.getAllVentes = async (req, res) => {
       .populate("client")
       .populate("promoCode")
       .populate("items.itemId")
-      .sort("-createdAt");
+      .sort("-reference");
 
     res.status(200).json({
       success: true,
@@ -282,6 +282,7 @@ exports.updateVente = async (req, res) => {
       promoCode: newPromoCode,
       additionalCharges,
       additionalDiscount,
+      createdAt, // Extract createdAt from req.body
     } = req.body;
 
     // Fetch existing vente
@@ -383,35 +384,60 @@ exports.updateVente = async (req, res) => {
       carNumber: livreur?.carNumber || "",
     };
 
-    const updatedVente = await Vente.findByIdAndUpdate(
-      id,
-      {
-        client,
-        livreur: updatedLivreur,
-        items,
-        tva: tva.toFixed(3),
-        totalHT: totalHT.toFixed(3),
-        totalTTC: totalTTC.toFixed(3),
-        livraison: livraisonCost.toFixed(3),
-        discount: discount.toFixed(3),
-        productsDiscount: productDiscount.plus(packDiscount).toFixed(3), // Combine discounts
-        netAPayer: netAPayer.toFixed(3),
-        note: note || "",
-        modePayment: modePayment || "CASH",
-        status: status || "pending",
-        promoCode: promoCodeObject,
-      },
-      { new: true, runValidators: true }
-    )
-      .populate("items.itemId")
-      .populate("client")
-      .populate("promoCode");
+    // Prepare update data
+    const updateData = {
+      client,
+      livreur: updatedLivreur,
+      items,
+      tva: tva.toFixed(3),
+      totalHT: totalHT.toFixed(3),
+      totalTTC: totalTTC.toFixed(3),
+      livraison: livraisonCost.toFixed(3),
+      discount: discount.toFixed(3),
+      additionalCharges: additionalCharges.toFixed(3),
+      productsDiscount: productDiscount.plus(packDiscount).toFixed(3),
+      netAPayer: netAPayer.toFixed(3),
+      note: note || "",
+      modePayment: modePayment || "CASH",
+      status: status || "pending",
+      promoCode: promoCodeObject,
+    };
 
-    res.status(200).json({ success: true, data: updatedVente });
+    try {
+      // Update the document without triggering Mongoose middleware
+      let updatedVente;
+
+      if (createdAt) {
+        // Use MongoDB's native update operation to update createdAt
+        await Vente.collection.updateOne(
+          { _id: new mongoose.Types.ObjectId(id) },
+          { $set: { createdAt: new Date(createdAt) } }
+        );
+      }
+
+      // Now update the rest of the fields through Mongoose
+      updatedVente = await Vente.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
+      })
+        .populate("items.itemId")
+        .populate("client")
+        .populate("promoCode");
+
+      res.status(200).json({ success: true, data: updatedVente });
+    } catch (updateError) {
+      console.error("Error updating document:", updateError);
+      res.status(500).json({
+        success: false,
+        message: "Error updating purchase order data",
+        error: updateError.message,
+      });
+    }
   } catch (error) {
+    console.error("Error in updateVente controller:", error);
     res.status(500).json({
       success: false,
-      message: "Error updating purchase order",
+      message: "Error processing purchase order",
       error: error.message,
     });
   }

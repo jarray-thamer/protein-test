@@ -12,7 +12,13 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Button } from "../ui/button";
-import { CheckIcon, PlusCircle, UserPlus, Trash2 } from "lucide-react";
+import {
+  CheckIcon,
+  PlusCircle,
+  UserPlus,
+  Trash2,
+  ChevronsUpDownIcon,
+} from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
@@ -31,6 +37,17 @@ import {
   getVenteById,
   updateVente,
 } from "@/helpers/vente/communicator";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
+import { cn } from "@/lib/utils";
+import BarcodeScanner from "../scanBarCode";
 
 // Form schema remains unchanged
 const formSchema = z.object({
@@ -241,9 +258,22 @@ const VenteForm = () => {
     }
   };
 
-  const onSubmit = async (values) => {
-    console.log(values);
+  const clientOptions = clients.map((client) => ({
+    label: `${client.name} - ${client.phone1} - ${client.ville} - ${client.email}`,
+    value: client._id,
+  }));
 
+  const productOptions = products.map((product) => ({
+    label: product.designation,
+    value: product._id,
+  }));
+
+  const packOptions = packs.map((pack) => ({
+    label: pack.designation,
+    value: pack._id,
+  }));
+
+  const onSubmit = async (values) => {
     try {
       if (id) {
         await updateVente(id, values);
@@ -256,6 +286,22 @@ const VenteForm = () => {
     } catch (error) {
       toast.error("Failed to save Vente");
       console.error("Submission error:", error);
+    }
+  };
+  const handleBarcodeScanned = (scannedBarcode) => {
+    const product = products.find((p) => p.codaBar === scannedBarcode);
+    if (product) {
+      append({
+        type: "Product",
+        itemId: product._id,
+        quantity: 1,
+        price: product.price,
+        designation: product.designation,
+        oldPrice: product.oldPrice || 0,
+      });
+      toast.success(`${product.designation} added`);
+    } else {
+      toast.error("Product not found");
     }
   };
 
@@ -303,23 +349,63 @@ const VenteForm = () => {
                   control={form.control}
                   name="clientId"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Select Client</FormLabel>
-                      <Select
-                        onValueChange={(value) => handleClientSelect(value)}
-                        value={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a client" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {clients.map((client) => (
-                            <SelectItem key={client._id} value={client._id}>
-                              {client.name} - {client.phone1} - {client.ville}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-full justify-between",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value
+                                ? clientOptions.find(
+                                    (client) => client.value === field.value
+                                  )?.label
+                                : "Select client"}
+                              <ChevronsUpDownIcon className="w-4 h-4 ml-2 opacity-50 shrink-0" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput
+                              placeholder="Search client..."
+                              className="h-9"
+                            />
+                            <CommandList>
+                              <CommandEmpty>No client found.</CommandEmpty>
+                              <CommandGroup>
+                                {clientOptions.map((client) => (
+                                  <CommandItem
+                                    key={client.value}
+                                    value={client.label} // Used for search filtering
+                                    onSelect={() => {
+                                      form.setValue("clientId", client.value);
+                                      handleClientSelect(client.value); // Update client details
+                                    }}
+                                  >
+                                    {client.label}
+                                    <CheckIcon
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        client.value === field.value
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -452,41 +538,80 @@ const VenteForm = () => {
                         <FormField
                           control={form.control}
                           name={`items.${index}.itemId`}
-                          render={({ field: itemField }) => (
-                            <FormItem>
-                              <FormLabel>Item</FormLabel>
-                              <Select
-                                value={itemField.value}
-                                onValueChange={(value) =>
-                                  handleItemChange(value, index)
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select item" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {form.watch(`items.${index}.type`) ===
-                                  "Product"
-                                    ? products.map((product) => (
-                                        <SelectItem
-                                          key={product._id}
-                                          value={product._id}
-                                        >
-                                          {product.designation}
-                                        </SelectItem>
-                                      ))
-                                    : packs.map((pack) => (
-                                        <SelectItem
-                                          key={pack._id}
-                                          value={pack._id}
-                                        >
-                                          {pack.designation}
-                                        </SelectItem>
-                                      ))}
-                                </SelectContent>
-                              </Select>
-                            </FormItem>
-                          )}
+                          render={({ field }) => {
+                            const itemType = form.watch(`items.${index}.type`);
+                            const options =
+                              itemType === "Product"
+                                ? productOptions
+                                : packOptions;
+
+                            return (
+                              <FormItem className="flex flex-col justify-center mt-2">
+                                <FormLabel>Item</FormLabel>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        className={cn(
+                                          "w-full justify-between",
+                                          !field.value &&
+                                            "text-muted-foreground"
+                                        )}
+                                      >
+                                        {field.value
+                                          ? options.find(
+                                              (option) =>
+                                                option.value === field.value
+                                            )?.label
+                                          : "Select item"}
+                                        <ChevronsUpDownIcon className="w-4 h-4 ml-2 opacity-50 shrink-0" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-full p-0">
+                                    <Command>
+                                      <CommandInput
+                                        placeholder="Search item..."
+                                        className="h-9"
+                                      />
+                                      <CommandList>
+                                        <CommandEmpty>
+                                          No item found.
+                                        </CommandEmpty>
+                                        <CommandGroup>
+                                          {options.map((option) => (
+                                            <CommandItem
+                                              key={option.value}
+                                              value={option.label} // Used for search filtering
+                                              onSelect={() => {
+                                                handleItemChange(
+                                                  option.value,
+                                                  index
+                                                );
+                                              }}
+                                            >
+                                              {option.label}
+                                              <CheckIcon
+                                                className={cn(
+                                                  "ml-auto h-4 w-4",
+                                                  option.value === field.value
+                                                    ? "opacity-100"
+                                                    : "opacity-0"
+                                                )}
+                                              />
+                                            </CommandItem>
+                                          ))}
+                                        </CommandGroup>
+                                      </CommandList>
+                                    </Command>
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
                         />
                       </div>
 
@@ -543,7 +668,7 @@ const VenteForm = () => {
                     </div>
                   </div>
                 ))}
-
+                <BarcodeScanner onScan={handleBarcodeScanned} />
                 <Button
                   type="button"
                   onClick={() =>

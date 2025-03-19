@@ -143,6 +143,7 @@ const createProduct = async (req, res) => {
             variant: JSON.parse(req?.body.variant) || [],
             category: categoryId || null,
             subCategory: subCategoryIds || [],
+            codaBar: req.body.codaBar || "",
           },
         ],
         { session }
@@ -272,6 +273,7 @@ const updateProduct = async (req, res) => {
     const { id: productId } = req.params;
     const rawData = {
       designation: req.body?.designation,
+      codaBar: req.body?.codaBar || "",
       question: req.body?.question,
       description: req.body?.description,
       smallDescription: req.body?.smallDescription,
@@ -370,6 +372,7 @@ const updateProduct = async (req, res) => {
       description: rawData.description,
       smallDescription: rawData.smallDescription,
       venteflashDate: rawData.venteflashDate,
+      codaBar: rawData.codaBar,
       question: rawData.question,
       price: rawData.price,
       oldPrice: rawData.oldPrice,

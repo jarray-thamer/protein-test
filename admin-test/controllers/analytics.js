@@ -6,7 +6,6 @@ const {
   getPromoCodeUsageStats,
 } = require("../utils/statistique");
 const Vente = require("../models/Ventes.js");
-// const Order = require("../models/Orders");
 
 const getTopSellingProducts = async (req, res) => {
   try {

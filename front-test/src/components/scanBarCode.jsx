@@ -1,31 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const BarcodeScanner = () => {
+const BarcodeScanner = ({ onScan }) => {
   const [barcode, setBarcode] = useState("");
-  const [scannedBarcode, setScannedBarcode] = useState("");
   const inputRef = useRef(null);
 
-  // Focus the input when component mounts
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    inputRef.current?.focus();
   }, []);
 
   const handleScan = (e) => {
-    // Check if Enter key is pressed (most scanners send Enter after scan)
     if (e.key === "Enter") {
       e.preventDefault();
-
-      // Save the scanned barcode for display
-      setScannedBarcode(barcode);
-      setBarcode(""); // Clear input for next scan
+      onScan(barcode); // Trigger callback
+      setBarcode("");
     }
   };
 
   return (
-    <div>
-      <h2>Codabar Scanner</h2>
+    <div className="mb-4">
       <input
         type="text"
         ref={inputRef}
@@ -33,17 +25,9 @@ const BarcodeScanner = () => {
         onChange={(e) => setBarcode(e.target.value)}
         onKeyDown={handleScan}
         placeholder="Scan codabar"
+        className="w-full p-2 border rounded"
         autoFocus
       />
-
-      {scannedBarcode && (
-        <div style={{ marginTop: "20px" }}>
-          <h3>Scanned Codabar:</h3>
-          <p style={{ fontSize: "24px", fontWeight: "bold" }}>
-            {scannedBarcode}
-          </p>
-        </div>
-      )}
     </div>
   );
 };

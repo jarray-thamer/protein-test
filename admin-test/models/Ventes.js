@@ -40,10 +40,12 @@ const VenteSchema = new Schema(
     tva: { type: Number },
     discount: { type: Number },
     totalHT: { type: Number },
+    additionalCharges: { type: Number },
     totalTTC: { type: Number },
     livraison: { type: Number },
     netAPayer: { type: Number },
     modePayment: { type: String },
+    date: { type: Date },
     note: { type: String },
     promoCode: {
       id: { type: Schema.Types.ObjectId, ref: "PromoCode" },

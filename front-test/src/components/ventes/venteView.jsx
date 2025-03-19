@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Icon } from "@iconify/react"
-import { useEffect, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
-import { Button } from "../ui/button"
+import { cn } from "@/lib/utils";
+import { Icon } from "@iconify/react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { Button } from "../ui/button";
 import {
   AlertCircleIcon,
   ArrowLeftIcon,
@@ -28,114 +28,153 @@ import {
   TruckIcon,
   UserIcon,
   XCircleIcon,
-} from "lucide-react"
-import { Separator } from "../ui/separator"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu"
-import { formatDate } from "@/lib/formattedData"
-import { getVenteById } from "@/helpers/vente/communicator"
-import { formatCurrency } from "@/lib/formattedCurrency"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
-import { Textarea } from "../ui/textarea"
-import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { getAdvancedData } from "@/helpers/settings/general"
-import { handleDeleteManyVentes } from "@/functions/vente"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card"
-import { Badge } from "../ui/badge"
-import { Avatar, AvatarFallback } from "../ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
+} from "lucide-react";
+import { Separator } from "../ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { formatDate } from "@/lib/formattedData";
+import { getVenteById } from "@/helpers/vente/communicator";
+import { formatCurrency } from "@/lib/formattedCurrency";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Textarea } from "../ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "../ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { getAdvancedData } from "@/helpers/settings/general";
+import { handleDeleteManyVentes } from "@/functions/vente";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 const FormSchema = z.object({
   note: z.string(),
-})
+});
 
 const VenteView = () => {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const [vente, setVente] = useState({})
-  const [advancedData, setAdvancedData] = useState({})
-  const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [vente, setVente] = useState({});
+  const [advancedData, setAdvancedData] = useState({});
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const [venteRes, advancedRes] = await Promise.all([getVenteById(id), getAdvancedData()])
+        const [venteRes, advancedRes] = await Promise.all([
+          getVenteById(id),
+          getAdvancedData(),
+        ]);
         console.log("venteRes:", venteRes.data);
 
-        setVente(venteRes.data)
-        setAdvancedData(advancedRes)
-        form.reset({ note: venteRes.data.note || "" })
+        setVente(venteRes.data);
+        setAdvancedData(advancedRes);
+        form.reset({ note: venteRes.data.note || "" });
       } catch (err) {
-        console.error("Error fetching data:", err)
-        setError(err.message || "Failed to load sale details")
+        console.error("Error fetching data:", err);
+        setError(err.message || "Failed to load sale details");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
     if (id) {
-      fetchData()
+      fetchData();
     }
-  }, [id])
+  }, [id]);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       note: "",
     },
-  })
+  });
 
   function onSubmit(data) {
-    console.log(data)
-    setOpen(false)
+    console.log(data);
+    setOpen(false);
   }
 
   async function handleDeleteVente() {
     try {
-      await handleDeleteManyVentes([id])
-      navigate("/vente")
+      await handleDeleteManyVentes([id]);
+      navigate("/vente");
     } catch (error) {
-      console.error("Error deleting vente:", error)
+      console.error("Error deleting vente:", error);
     }
   }
 
   const getStatusBadge = (status) => {
-    if (!status) return null
+    if (!status) return null;
 
-    const statusLower = status.toLowerCase()
-    let icon = null
-    let className = ""
+    const statusLower = status.toLowerCase();
+    let icon = null;
+    let className = "";
 
     switch (statusLower) {
       case "pending":
-        icon = <ClockIcon className="w-3 h-3 mr-1" />
-        className = "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-        break
+        icon = <ClockIcon className="w-3 h-3 mr-1" />;
+        className =
+          "text-yellow-800 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400";
+        break;
       case "paid":
-        icon = <CheckCircleIcon className="w-3 h-3 mr-1" />
-        className = "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-        break
+        icon = <CheckCircleIcon className="w-3 h-3 mr-1" />;
+        className =
+          "text-green-800 bg-green-100 dark:bg-green-900/30 dark:text-green-400";
+        break;
       case "cancelled":
-        icon = <XCircleIcon className="w-3 h-3 mr-1" />
-        className = "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-        break
+        icon = <XCircleIcon className="w-3 h-3 mr-1" />;
+        className =
+          "text-red-800 bg-red-100 dark:bg-red-900/30 dark:text-red-400";
+        break;
       case "processing":
-        icon = <RefreshCwIcon className="w-3 h-3 mr-1" />
-        className = "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-        break
+        icon = <RefreshCwIcon className="w-3 h-3 mr-1" />;
+        className =
+          "text-blue-800 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400";
+        break;
       case "delivered":
-        icon = <TruckIcon className="w-3 h-3 mr-1" />
-        className = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
-        break
+        icon = <TruckIcon className="w-3 h-3 mr-1" />;
+        className =
+          "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
+        break;
       default:
-        icon = <AlertCircleIcon className="w-3 h-3 mr-1" />
-        className = "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
+        icon = <AlertCircleIcon className="w-3 h-3 mr-1" />;
+        className =
+          "text-gray-800 bg-gray-100 dark:bg-gray-900/30 dark:text-gray-400";
     }
 
     return (
@@ -143,57 +182,71 @@ const VenteView = () => {
         {icon}
         <span className="capitalize">{status}</span>
       </Badge>
-    )
-  }
+    );
+  };
 
   // Get client initials for avatar
   const getInitials = (name) => {
-    if (!name) return "?"
+    if (!name) return "?";
     return name
       .split(" ")
       .map((part) => part[0])
       .join("")
       .toUpperCase()
-      .substring(0, 2)
-  }
+      .substring(0, 2);
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center w-full h-96">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-t-primary rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 rounded-full border-t-primary animate-spin"></div>
           <p className="text-muted-foreground">Loading sale details...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center w-full h-96 p-6">
-        <XCircleIcon className="w-12 h-12 text-destructive mb-4" />
-        <h3 className="text-xl font-medium mb-2">Error Loading Sale</h3>
-        <p className="text-muted-foreground text-center">{error}</p>
-        <Button variant="outline" className="mt-6" onClick={() => navigate("/vente")}>
+      <div className="flex flex-col items-center justify-center w-full p-6 h-96">
+        <XCircleIcon className="w-12 h-12 mb-4 text-destructive" />
+        <h3 className="mb-2 text-xl font-medium">Error Loading Sale</h3>
+        <p className="text-center text-muted-foreground">{error}</p>
+        <Button
+          variant="outline"
+          className="mt-6"
+          onClick={() => navigate("/vente")}
+        >
           <ArrowLeftIcon className="w-4 h-4 mr-2" />
           Back to Sales
         </Button>
       </div>
-    )
+    );
   }
 
   return (
     <div className="flex flex-col p-4 mx-auto md:p-6 max-w-screen-2xl">
       {/* Header with breadcrumb and actions */}
-      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-6">
+      <div className="flex flex-col mb-6 space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/vente")} className="h-8 gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/vente")}
+            className="h-8 gap-1"
+          >
             <ArrowLeftIcon className="w-4 h-4" />
             <span>Back to Sales</span>
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <div className="flex items-center">
-            <Icon icon="mdi:storefront" width="20" height="20" className="text-primary mr-2" />
+            <Icon
+              icon="mdi:storefront"
+              width="20"
+              height="20"
+              className="mr-2 text-primary"
+            />
             <span className="text-sm text-muted-foreground">Sale Details</span>
           </div>
         </div>
@@ -201,10 +254,10 @@ const VenteView = () => {
         <div className="flex items-center space-x-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 gap-1">
+              <Button variant="outline" size="sm" className="gap-1 h-9">
                 <PrinterIcon className="w-4 h-4" />
                 <span>Print</span>
-                <ChevronDownIcon className="h-4 w-4 ml-1 opacity-70" />
+                <ChevronDownIcon className="w-4 h-4 ml-1 opacity-70" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -244,14 +297,19 @@ const VenteView = () => {
           <Button
             variant="outline"
             size="sm"
-            className="h-9 gap-1 border-primary/20 text-primary hover:bg-primary/10"
+            className="gap-1 h-9 border-primary/20 text-primary hover:bg-primary/10"
             onClick={() => navigate(`/vente/edit/${id}`)}
           >
             <EditIcon className="w-4 h-4" />
             <span>Edit</span>
           </Button>
 
-          <Button variant="destructive" size="sm" className="h-9 gap-1" onClick={handleDeleteVente}>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="gap-1 h-9"
+            onClick={handleDeleteVente}
+          >
             <Trash2Icon className="w-4 h-4" />
             <span>Delete</span>
           </Button>
@@ -259,7 +317,7 @@ const VenteView = () => {
       </div>
 
       {/* Sale header with reference, status and total */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-3">
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
@@ -269,23 +327,33 @@ const VenteView = () => {
               </div>
               {getStatusBadge(vente.status)}
             </div>
-            <CardDescription className="text-sm mt-1">Reference: {vente.reference}</CardDescription>
+            <CardDescription className="mt-1 text-sm">
+              Reference: {vente.reference}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">Sale #{vente.reference}</h1>
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  Sale #{vente.reference}
+                </h1>
                 <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                   <CalendarIcon className="w-4 h-4" />
                   <span>Created: {formatDate(vente.createdAt)}</span>
                   <Separator orientation="vertical" className="h-4" />
-                  <span>Updated: {formatDate(vente.updatedAt || vente.createdAt)}</span>
+                  <span>
+                    Updated: {formatDate(vente.updatedAt || vente.createdAt)}
+                  </span>
                 </div>
               </div>
 
               <div className="flex flex-col items-end">
-                <div className="text-sm text-muted-foreground">Total Amount</div>
-                <div className="text-2xl font-bold text-primary">{formatCurrency(vente.netAPayer || 0)}</div>
+                <div className="text-sm text-muted-foreground">
+                  Total Amount
+                </div>
+                <div className="text-2xl font-bold text-primary">
+                  {formatCurrency(vente.netAPayer || 0)}
+                </div>
                 {vente.modePayment && (
                   <div className="flex items-center gap-1 mt-1 text-sm">
                     <CreditCardIcon className="w-3 h-3" />
@@ -306,13 +374,15 @@ const VenteView = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-start gap-3">
-              <Avatar className="h-10 w-10 border">
+              <Avatar className="w-10 h-10 border">
                 <AvatarFallback className="bg-primary/10 text-primary">
                   {getInitials(vente.client?.name)}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-medium">{vente.client?.name || "Unnamed Client"}</h3>
+                <h3 className="font-medium">
+                  {vente.client?.name || "Unnamed Client"}
+                </h3>
                 <div className="flex flex-col gap-1 mt-2 text-sm">
                   {vente.client?.email && (
                     <div className="flex items-center gap-2">
@@ -331,7 +401,7 @@ const VenteView = () => {
             </div>
 
             {(vente.client?.address || vente.client?.ville) && (
-              <div className="mt-4 pt-4 border-t">
+              <div className="pt-4 mt-4 border-t">
                 <div className="flex items-start gap-2">
                   <MapPinIcon className="w-3.5 h-3.5 mt-0.5 text-muted-foreground" />
                   <div>
@@ -341,10 +411,10 @@ const VenteView = () => {
                 </div>
               </div>
             )}
-            {(vente.client?.clientNote ) && (
-              <div className="mt-4 pt-4 border-t">
+            {vente.client?.clientNote && (
+              <div className="pt-4 mt-4 border-t">
                 <div className="flex items-start gap-2">
-                <ClipboardIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
+                  <ClipboardIcon className="w-10 h-10 mb-3 text-muted-foreground/30" />
                   <div>
                     <div>{vente.client.clientNote}</div>
                   </div>
@@ -352,12 +422,12 @@ const VenteView = () => {
               </div>
             )}
           </CardContent>
-          <CardFooter className="border-t pt-4">
+          <CardFooter className="pt-4 border-t">
             <Button
               variant="outline"
               size="sm"
               className="w-full"
-              onClick={() => navigate(`/clients/${vente.client?._id}`)}
+              onClick={() => navigate(`/clients/${vente.client?.id}`)}
             >
               View Client Profile
             </Button>
@@ -382,41 +452,67 @@ const VenteView = () => {
                   <PackageIcon className="w-5 h-5 text-primary" />
                   <CardTitle>Purchased Items</CardTitle>
                 </div>
-                {vente.items?.length > 0 && <Badge variant="outline">{vente.items.length} Items</Badge>}
+                {vente.items?.length > 0 && (
+                  <Badge variant="outline">{vente.items.length} Items</Badge>
+                )}
               </div>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-muted/75 text-sm">
-                      <th className="px-4 py-3 font-medium text-left">Product</th>
-                      <th className="px-4 py-3 font-medium text-left">Price HT</th>
+                    <tr className="text-sm bg-muted/75">
+                      <th className="px-4 py-3 font-medium text-left">
+                        Product
+                      </th>
+                      <th className="px-4 py-3 font-medium text-left">
+                        Price HT
+                      </th>
                       <th className="px-4 py-3 font-medium text-center">QTY</th>
-                      <th className="px-4 py-3 font-medium text-right">Unit Price</th>
-                      <th className="px-4 py-3 font-medium text-right">Total TTC</th>
+                      <th className="px-4 py-3 font-medium text-right">
+                        Unit Price
+                      </th>
+                      <th className="px-4 py-3 font-medium text-right">
+                        Total TTC
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {vente?.items?.map((item, index) => (
-                      <tr key={index} className={cn("border-b", index % 2 !== 0 ? "bg-muted/30" : "")}>
+                      <tr
+                        key={index}
+                        className={cn(
+                          "border-b",
+                          index % 2 !== 0 ? "bg-muted/30" : ""
+                        )}
+                      >
                         <td className="px-4 py-3 text-left">
                           <div className="flex flex-col">
-                            <span className="font-medium">{item?.designation || ""}</span>
+                            <span className="font-medium">
+                              {item?.designation || ""}
+                            </span>
                             {item.variant && (
-                              <span className="text-xs text-muted-foreground">Variant: {item.variant}</span>
+                              <span className="text-xs text-muted-foreground">
+                                Variant: {item.variant}
+                              </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-left">{formatCurrency(item.price)}</td>
+                        <td className="px-4 py-3 text-left">
+                          {formatCurrency(item.price)}
+                        </td>
                         <td className="px-4 py-3 text-center">
                           <Badge variant="outline" className="font-mono">
                             {item.quantity}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-right">{formatCurrency(item.price + item.price * 0.19)}</td>
-                        <td className="px-4 py-3 text-right font-medium">
-                          {formatCurrency((item.price + item.price * 0.19) * item.quantity)}
+                        <td className="px-4 py-3 text-right">
+                          {formatCurrency(item.price + item.price * 0.19)}
+                        </td>
+                        <td className="px-4 py-3 font-medium text-right">
+                          {formatCurrency(
+                            (item.price + item.price * 0.19) * item.quantity
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -424,8 +520,8 @@ const VenteView = () => {
                 </table>
               </div>
 
-              <div className="mt-6 border rounded-lg overflow-hidden">
-                <div className="bg-muted/50 px-4 py-3">
+              <div className="mt-6 overflow-hidden border rounded-lg">
+                <div className="px-4 py-3 bg-muted/50">
                   <h3 className="font-medium">Order Summary</h3>
                 </div>
                 <div className="p-4">
@@ -448,17 +544,25 @@ const VenteView = () => {
                         {vente.discount > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">
-                              Discount 
+                              Discount
                             </span>
-                            <span className="text-red-600">-{vente?.discount}</span>
+                            <span className="text-red-600">
+                              -{vente?.discount}
+                            </span>
                           </div>
                         )}
                         {vente.promoCode > 0 && (
                           <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">
-                              Promo Code {vente?.promoCode && `(${vente?.promoCode?.code })`}
+                              Promo Code{" "}
+                              {vente?.promoCode &&
+                                `(${vente?.promoCode?.code})`}
                             </span>
-                            {vente?.promoCode && <span className="text-red-600">-{vente?.promoCode?.value * 100}%</span>}
+                            {vente?.promoCode && (
+                              <span className="text-red-600">
+                                -{vente?.promoCode?.value * 100}%
+                              </span>
+                            )}
                           </div>
                         )}
                       </>
@@ -466,7 +570,9 @@ const VenteView = () => {
                     <Separator />
                     <div className="flex justify-between font-medium">
                       <span>Total</span>
-                      <span className="text-lg">{formatCurrency(vente.netAPayer || 0)}</span>
+                      <span className="text-lg">
+                        {formatCurrency(vente.netAPayer || 0)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -477,7 +583,7 @@ const VenteView = () => {
 
         {/* Summary Tab */}
         <TabsContent value="summary">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -488,27 +594,39 @@ const VenteView = () => {
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Sale ID</p>
-                    <p className="text-sm font-mono">{vente._id}</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Sale ID
+                    </p>
+                    <p className="font-mono text-sm">{vente._id}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Reference</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Reference
+                    </p>
                     <p>{vente.reference}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Status</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Status
+                    </p>
                     <p>{getStatusBadge(vente.status)}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Payment Method</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Payment Method
+                    </p>
                     <p>{vente.modePayment || "Not specified"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Created Date</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Created Date
+                    </p>
                     <p>{formatDate(vente.createdAt)}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Updated Date</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Updated Date
+                    </p>
                     <p>{formatDate(vente.updatedAt || vente.createdAt)}</p>
                   </div>
                 </div>
@@ -525,27 +643,43 @@ const VenteView = () => {
               <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Name</p>
-                    <p className="capitalize">{vente.client?.name || "Not specified"}</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Name
+                    </p>
+                    <p className="capitalize">
+                      {vente.client?.name || "Not specified"}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Email</p>
-                    <p className="text-primary">{vente.client?.email || "Not specified"}</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Email
+                    </p>
+                    <p className="text-primary">
+                      {vente.client?.email || "Not specified"}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Phone 1</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Phone 1
+                    </p>
                     <p>{vente.client?.phone1 || "Not specified"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Phone 2</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Phone 2
+                    </p>
                     <p>{vente.client?.phone2 || "Not specified"}</p>
                   </div>
-                  <div className="space-y-1 col-span-2">
-                    <p className="text-sm font-medium text-muted-foreground">Address</p>
+                  <div className="col-span-2 space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Address
+                    </p>
                     <p>{vente.client?.address || "Not specified"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">City</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      City
+                    </p>
                     <p>{vente.client?.ville || "Not specified"}</p>
                   </div>
                 </div>
@@ -564,15 +698,21 @@ const VenteView = () => {
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Delivery Person</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Delivery Person
+                    </p>
                     <p>{vente.livreur?.name || "Not specified"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">ID Number</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      ID Number
+                    </p>
                     <p>{vente.livreur?.cin || "Not specified"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Vehicle Number</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Vehicle Number
+                    </p>
                     <p>{vente.livreur?.carNumber || "Not specified"}</p>
                   </div>
                 </div>
@@ -583,7 +723,7 @@ const VenteView = () => {
 
         {/* Notes & Activity Tab */}
         <TabsContent value="notes">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -600,10 +740,15 @@ const VenteView = () => {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>{vente?.note ? "Edit Note" : "Add Note"}</DialogTitle>
+                        <DialogTitle>
+                          {vente?.note ? "Edit Note" : "Add Note"}
+                        </DialogTitle>
                       </DialogHeader>
                       <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <form
+                          onSubmit={form.handleSubmit(onSubmit)}
+                          className="space-y-6"
+                        >
                           <FormField
                             control={form.control}
                             name="note"
@@ -634,13 +779,15 @@ const VenteView = () => {
               </CardHeader>
               <CardContent>
                 {vente.note ? (
-                  <div className="p-4 rounded-lg border bg-muted/30">
+                  <div className="p-4 border rounded-lg bg-muted/30">
                     <p className="whitespace-pre-wrap">{vente.note}</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <ClipboardIcon className="w-10 h-10 text-muted-foreground/30 mb-3" />
-                    <p className="text-muted-foreground">No notes have been added to this sale</p>
+                    <ClipboardIcon className="w-10 h-10 mb-3 text-muted-foreground/30" />
+                    <p className="text-muted-foreground">
+                      No notes have been added to this sale
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -656,24 +803,31 @@ const VenteView = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    <div className="p-2 text-green-800 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">
                       <MailIcon className="w-4 h-4" />
                     </div>
                     <div>
                       <h6 className="text-sm font-medium">
-                        Sale was sent to <span className="text-primary">{vente?.client?.email}</span>
+                        Sale was sent to{" "}
+                        <span className="text-primary">
+                          {vente?.client?.email}
+                        </span>
                       </h6>
-                      <p className="text-xs text-muted-foreground">23 JAN, 2025, 10:00 AM</p>
+                      <p className="text-xs text-muted-foreground">
+                        23 JAN, 2025, 10:00 AM
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                    <div className="p-2 text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900/30 dark:text-blue-400">
                       <CheckCircleIcon className="w-4 h-4" />
                     </div>
                     <div>
                       <h6 className="text-sm font-medium">Sale was created</h6>
-                      <p className="text-xs text-muted-foreground">{formatDate(vente.createdAt)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(vente.createdAt)}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -684,8 +838,12 @@ const VenteView = () => {
       </Tabs>
 
       {/* Footer actions */}
-      <div className="flex items-center justify-between mt-8 pt-4 border-t">
-        <Button variant="ghost" onClick={() => navigate("/vente")} className="gap-1">
+      <div className="flex items-center justify-between pt-4 mt-8 border-t">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/vente")}
+          className="gap-1"
+        >
           <ArrowLeftIcon className="w-4 h-4" />
           <span>Back to Sales</span>
         </Button>
@@ -697,7 +855,9 @@ const VenteView = () => {
                 <Button
                   variant="outline"
                   className="gap-1"
-                  onClick={() => window.open(`/vente/print/facture/${id}`, "_blank")}
+                  onClick={() =>
+                    window.open(`/vente/print/facture/${id}`, "_blank")
+                  }
                 >
                   <PrinterIcon className="w-4 h-4" />
                   <span>Print Invoice</span>
@@ -718,15 +878,18 @@ const VenteView = () => {
             <span>Edit Sale</span>
           </Button>
 
-          <Button variant="destructive" className="gap-1" onClick={handleDeleteVente}>
+          <Button
+            variant="destructive"
+            className="gap-1"
+            onClick={handleDeleteVente}
+          >
             <Trash2Icon className="w-4 h-4" />
             <span>Delete Sale</span>
           </Button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VenteView
-
+export default VenteView;

@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const ProductSchema = new Schema(
   {
     designation: { type: String, required: true },
+    codaBar: { type: String },
     slug: { type: String },
     bestSellerSection: { type: Boolean, default: false },
     smallDescription: { type: String },

@@ -58,6 +58,7 @@ const formSchema = z.object({
     .min(0, { message: "Old price must be 0 or greater" })
     .optional(),
   inStock: z.boolean().default(false),
+  codaBar: z.string().optional(),
   status: z.boolean().default(false),
   features: z.array(z.string()).default([]),
   categoryId: z.string(),
@@ -113,6 +114,7 @@ export const ProductForm = () => {
       price: 0,
       oldPrice: 0,
       inStock: false,
+      codaBar: "",
       question: "",
       status: false,
       features: [],
@@ -158,6 +160,7 @@ export const ProductForm = () => {
             brand: productData.data?.brand || "",
             question: productData.data?.question || "",
             inStock: productData.data.inStock,
+            codaBar: productData.data?.codaBar || "",
             status: productData.data.status,
             features: productData.data.features || [],
             variant: productData.data.variant || [],
@@ -241,6 +244,7 @@ export const ProductForm = () => {
       // Append other fields
       formData.append("designation", values.designation);
       formData.append("smallDescription", values?.smallDescription);
+      formData.append("codaBar", values.codaBar || "");
       formData.append("question", values?.question);
       formData.append("description", values?.description);
       formData.append("price", values?.price);
@@ -463,7 +467,23 @@ export const ProductForm = () => {
                   setValue={form.setValue}
                 />
               </div>
-
+              <FormField
+                control={form.control}
+                name="codaBar"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Codabar</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isLoading}
+                        placeholder="Scan or enter codabar"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {/* Category and Pricing */}
               <div className="flex flex-col w-full p-6 space-y-4 bg-muted/45 rounded-xl">
                 <h3 className="text-lg font-medium text-primary">
