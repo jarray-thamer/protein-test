@@ -328,11 +328,7 @@ export const ProductForm = () => {
                     <FormItem>
                       <FormLabel>Designation</FormLabel>
                       <FormControl>
-                        <Input
-                          disabled={isLoading}
-                          placeholder="e.g Prostar 100% WHEY PROTEIN – 2.4KG"
-                          {...field}
-                        />
+                        <Input disabled={isLoading} placeholder="" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -343,12 +339,9 @@ export const ProductForm = () => {
                   name="smallDescription"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Small Description</FormLabel>
+                      <FormLabel>Meta Description</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder="Tell a little bit about the product"
-                          {...field}
-                        />
+                        <Textarea placeholder="" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -427,7 +420,7 @@ export const ProductForm = () => {
                           <Input
                             value={field.value}
                             disabled={isLoading}
-                            placeholder="e.g. Impact"
+                            placeholder=""
                             {...field}
                           />
                         </FormControl>
@@ -474,11 +467,7 @@ export const ProductForm = () => {
                   <FormItem>
                     <FormLabel>Codabar</FormLabel>
                     <FormControl>
-                      <Input
-                        disabled={isLoading}
-                        placeholder="Scan or enter codabar"
-                        {...field}
-                      />
+                      <Input disabled={isLoading} placeholder="" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -654,7 +643,7 @@ export const ProductForm = () => {
                         });
                       }}
                     >
-                      <FormLabel>Main Image</FormLabel>
+                      <FormLabel>Image principale</FormLabel>
                       <FormControl>
                         <MainImageUpload
                           value={field.value}

@@ -125,7 +125,7 @@ const BDLPdf = ({ data, entreprise }) => {
 
           <div className="mt-8 sm:mt-12">
             <h4 className="text-lg font-semibold text-gray-800 ">Merci!</h4>
-            <p className="text-gray-500 ">
+            <p className="text-gray-500  underline decoration-[#FF4000]">
               Si vous avez des questions concernant cette facture, veuillez
               utiliser les coordonnées suivantes :
             </p>

@@ -1,8 +1,10 @@
 import { formatCurrency } from "@/lib/formattedCurrency";
 import { formatDate } from "@/lib/formattedData";
 import React from "react";
+import writtenNumber from "written-number";
 
 const FacturePDF = ({ data, entreprise }) => {
+  writtenNumber.defaults.lang = "fr";
   return (
     <div
       className="w-full border"
@@ -76,19 +78,19 @@ const FacturePDF = ({ data, entreprise }) => {
               <thead>
                 <tr className="bg-gray-100">
                   <th className="p-2 text-left border border-gray-300">
-                    Désignation
+                    Produit
                   </th>
                   <th className="w-20 p-2 text-center border border-gray-300">
                     Quantité
                   </th>
                   <th className="w-32 p-2 text-right border border-gray-300">
-                    Prix U. HT
+                    P.U.HT
                   </th>
                   <th className="w-32 p-2 text-right border border-gray-300">
-                    Tva %
+                    Tva
                   </th>
                   <th className="w-32 p-2 text-right border border-gray-300">
-                    Prix Total TTC
+                    Totale HT
                   </th>
                 </tr>
               </thead>
@@ -111,11 +113,7 @@ const FacturePDF = ({ data, entreprise }) => {
                       {entreprise?.advanced?.tva * 100} %
                     </td>
                     <td className="p-2 text-right border border-gray-300">
-                      {(
-                        item.price * item.quantity +
-                        item.price * entreprise?.advanced?.tva * item.quantity
-                      ).toFixed(3)}{" "}
-                      DT
+                      {(item.price * item.quantity).toFixed(3)} DT
                     </td>
                   </tr>
                 ))}
@@ -127,21 +125,21 @@ const FacturePDF = ({ data, entreprise }) => {
             <div className="w-full max-w-2xl space-y-2 sm:text-end">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 sm:gap-2">
                 {[
-                  { label: "TotalHT:", value: data?.totalHT.toFixed(3) },
-                  { label: "TotalTVA:", value: data?.tva.toFixed(3) },
-                  { label: "Promotion:", value: data?.discount.toFixed(3) },
-                  {
-                    label: "Livraison:",
-                    value:
-                      data.livraison.toFixed(3) ||
-                      entreprise?.advanced.livraison.toFixed(3) ||
-                      0,
-                  },
+                  { label: "Total HT:", value: data?.totalHT.toFixed(3) },
+                  { label: "TVA:", value: data?.tva.toFixed(3) },
+                  // { label: "Promotion:", value: data?.discount.toFixed(3) },
+                  // {
+                  //   label: "Livraison:",
+                  //   value:
+                  //     data.livraison.toFixed(3) ||
+                  //     entreprise?.advanced.livraison.toFixed(3) ||
+                  //     0,
+                  // },
                   {
                     label: "Timbre:",
                     value: entreprise?.advanced.timber.toFixed(3),
                   },
-                  { label: "Net A Payer:", value: data?.netAPayer.toFixed(3) },
+                  { label: "Totale TTC:", value: data?.netAPayer.toFixed(3) },
                 ].map((item, index) => (
                   <dl key={index} className="grid sm:grid-cols-5 gap-x-12">
                     <dt className="col-span-4 font-semibold text-gray-800 ">
@@ -155,10 +153,16 @@ const FacturePDF = ({ data, entreprise }) => {
               </div>
             </div>
           </div>
-
-          <div className="mt-8 sm:mt-12">
+          <h3 className="mt-12">
+            <span className="font-semibold">
+              {" "}
+              Arréte la présente bond de commande a la somme de:
+            </span>{" "}
+            {writtenNumber(data?.netAPayer)}
+          </h3>
+          <div className="mt-3 ">
             <h4 className="text-lg font-semibold text-gray-800 ">Merci!</h4>
-            <p className="text-gray-500 ">
+            <p className="text-gray-500 underline decoration-[#FF4000]">
               Si vous avez des questions concernant cette facture, veuillez
               utiliser les coordonnées suivantes :
             </p>

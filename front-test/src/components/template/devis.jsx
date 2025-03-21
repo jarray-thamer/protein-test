@@ -1,7 +1,14 @@
 import { formatDate } from "@/lib/formattedData";
 import React from "react";
+import writtenNumber from "written-number";
 
 const DevisPdf = ({ data, entreprise }) => {
+  function calculateDiscountPercent(total, discount) {
+    if (!total || total <= 0) return 0;
+    return ((discount / total) * 100).toFixed(2);
+  }
+
+  writtenNumber.defaults.lang = "fr";
   return (
     <div
       className="w-full border"
@@ -75,16 +82,16 @@ const DevisPdf = ({ data, entreprise }) => {
               <thead>
                 <tr className="bg-gray-100">
                   <th className="p-2 text-left border border-gray-300">
-                    Désignation
+                    Produit
                   </th>
                   <th className="w-20 p-2 text-center border border-gray-300">
                     Quantité
                   </th>
                   <th className="w-32 p-2 text-right border border-gray-300">
-                    Prix U. HT
+                    Prix.U
                   </th>
                   <th className="w-32 p-2 text-right border border-gray-300">
-                    Prix Total TTC
+                    Prix T.TTC
                   </th>
                 </tr>
               </thead>
@@ -101,7 +108,10 @@ const DevisPdf = ({ data, entreprise }) => {
                       {item.quantity}
                     </td>
                     <td className="p-2 text-right border border-gray-300">
-                      {item.price.toFixed(3)}
+                      {(
+                        item.price +
+                        item.price * entreprise?.advanced?.tva
+                      ).toFixed(3)}
                     </td>
                     <td className="p-2 text-right border border-gray-300">
                       {(
@@ -119,17 +129,26 @@ const DevisPdf = ({ data, entreprise }) => {
             <div className="w-full max-w-2xl space-y-2 sm:text-end">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-1 sm:gap-2">
                 {[
-                  { label: "TotalHT:", value: data?.totalHT.toFixed(3) },
-
-                  { label: "Promotion:", value: data?.discount.toFixed(3) },
                   {
-                    label: "Livraison:",
-                    value:
-                      data.livraison.toFixed(3) ||
-                      entreprise?.advanced.livraison.toFixed(3) ||
-                      0,
+                    label: "Montant Total HT:",
+                    value: data?.totalHT.toFixed(3),
                   },
-                  { label: "Net A Payer:", value: data?.netAPayer.toFixed(3) },
+
+                  {
+                    label: "Montant Remise:",
+                    value: data?.discount.toFixed(3),
+                  },
+                  {
+                    label: "Poucentage Remise %	",
+                    value:
+                      calculateDiscountPercent(data?.totalTTC, data?.discount) +
+                      " %",
+                  },
+
+                  {
+                    label: "Montant Totale TTC:",
+                    value: data?.netAPayer.toFixed(3),
+                  },
                 ].map((item, index) => (
                   <dl key={index} className="grid sm:grid-cols-5 gap-x-3">
                     <dt className="col-span-3 font-semibold text-gray-800 ">
@@ -142,9 +161,16 @@ const DevisPdf = ({ data, entreprise }) => {
             </div>
           </div>
 
-          <div className="mt-8 sm:mt-12">
+          <h3 className="mt-12">
+            <span className="font-semibold">
+              {" "}
+              Arréte la présente bond de commande a la somme de:
+            </span>{" "}
+            {writtenNumber(data?.netAPayer)}
+          </h3>
+          <div className="mt-3 ">
             <h4 className="text-lg font-semibold text-gray-800 ">Merci!</h4>
-            <p className="text-gray-500 ">
+            <p className="text-gray-500 underline decoration-[#FF4000]">
               Si vous avez des questions concernant cette facture, veuillez
               utiliser les coordonnées suivantes :
             </p>

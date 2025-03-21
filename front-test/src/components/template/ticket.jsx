@@ -4,7 +4,7 @@ import React from "react";
 export const TicketPDF = ({ data, entreprise }) => {
   return (
     <div
-      className="w-full border"
+      className="w-full pb-8 border"
       style={{ maxWidth: "8cm", margin: "0 auto" }}
     >
       <div className="flex flex-col items-center w-full p-4 pt-10 bg-white ">
