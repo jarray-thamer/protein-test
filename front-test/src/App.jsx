@@ -36,6 +36,9 @@ import BrandsManagement from "./components/forms/brandsForm";
 import { MessagesList } from "./pages/adminView/messages";
 import { ProtectedRoute } from "./components/protectedRoute";
 import BarcodeScanner from "./components/scanBarCode";
+import PagesPage from "./pages/adminView/pages";
+import { PageForm } from "./components/forms/pageForm";
+import PageView from "./components/pages/pageView";
 
 function App() {
   return (
@@ -114,6 +117,11 @@ function App() {
             {/* Messages routes */}
             <Route path="/messages" element={<MessagesList />} />
             <Route path="/scan" element={<BarcodeScanner />} />
+            {/* Pages routes */}
+            <Route path="/pages" element={<PagesPage />} />
+            <Route path="/pages/new" element={<PageForm />} />
+            <Route path="/pages/edit/:id" element={<PageForm />} />
+            <Route path="/pages/:slug" element={<PageView />} />
           </Route>
           <Route path="*" element={<h1>Not found</h1>} />
         </Routes>

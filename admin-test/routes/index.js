@@ -11,6 +11,7 @@ const AdminInformationRouter = require("./information");
 const Analytics = require("./analytics");
 const BlogRoute = require("./blog");
 const messagesRoutes = require("./messages");
+const PageRouter = require("./page");
 
 const adminRouter = Router();
 
@@ -26,5 +27,6 @@ adminRouter.use("/settings", AdminInformationRouter);
 adminRouter.use("/analytics", Analytics);
 adminRouter.use("/blogs", BlogRoute);
 adminRouter.use("/messages", messagesRoutes);
+adminRouter.use("/pages", PageRouter);
 
 module.exports = adminRouter;
