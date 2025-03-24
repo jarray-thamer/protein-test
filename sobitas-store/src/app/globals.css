@@ -9,8 +9,45 @@
   padding: 0;
 }
 
+/* Custom animations for product card */
+@keyframes pulse-border {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(var(--primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0);
+  }
+}
+
+/* Custom styling for Ant Design Rate component */
 .custom-rate .ant-rate-star {
-  font-size: 16px; /* Adjust size as needed */
+  margin-right: 2px;
+}
+
+.custom-rate .ant-rate-star-full .ant-rate-star-second {
+  color: #f5a623;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .custom-rate .ant-rate-star {
+    font-size: 14px;
+  }
+}
+
+/* Hover effects */
+.product-card-hover-effect:hover {
+  transform: translateY(-4px);
+  transition: transform 0.3s ease;
+}
+
+/* Accessibility focus styles */
+.product-card-focus:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 @import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
 
