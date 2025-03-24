@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Separator } from "../ui/separator";
 import Link from "next/link";
@@ -13,19 +14,36 @@ const Footer = ({ information }) => {
             {/* subscribe */}
             <div className="mx-auto xl:w-1/2">
               <h1 className="font-bold uppercase ">Abonnez-vous</h1>
-              <p>
+              <p className="text-primary">
                 Rejoignez plus de 60000 abonnés et obtenez un nouveau coupon de
                 réduction chaque mercredi.
               </p>
-              <div className="flex items-center w-full mx-auto my-2 mb-8">
-                <input
-                  className="w-full h-12 px-2 border"
-                  placeholder="Enter your Email Address"
-                />
-                <button className="h-[48px] w-fit  px-8  py-2.5 bg-primary hover:bg-white hover:text-primary transition-all duration-500 text-white">
-                  SUBSCRIBE→
-                </button>
-              </div>
+              {/* <div className="bg-[#000000] text-white p-6 rounded-lg flex flex-col md:flex-row justify-between items-center"> */}
+              <form
+                className="flex items-center w-full mt-4 overflow-hidden bg-white rounded-md"
+                // onSubmit={handleSubscribe}
+                style={{ transform: "skewX(-20deg)" }}
+              >
+                <div
+                  style={{ transform: "skewX(2deg)" }}
+                  className="flex items-center w-full"
+                >
+                  <input
+                    type="email"
+                    placeholder="Votre adresse e-mail"
+                    // value={email}
+                    // onChange={(e) => setEmail(e.target.value)}
+                    className="w-full p-3 text-black outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-[#FF5000] text-white font-bold px-6 py-3 hover:bg-[#FF8000] transition-all"
+                  >
+                    S&apos;abonner
+                  </button>
+                </div>
+              </form>
+              {/* </div> */}
             </div>
             {/*  */}
             <Separator className="mb-4 " />

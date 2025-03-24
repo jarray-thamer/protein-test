@@ -2,8 +2,6 @@ import {
   HandCoinsIcon,
   HeadsetIcon,
   HeartHandshakeIcon,
-  MailIcon,
-  RefreshCcw,
   TruckIcon,
 } from "lucide-react";
 import React from "react";
@@ -11,7 +9,7 @@ import { Separator } from "../ui/separator";
 
 const Feature = () => {
   return (
-    <div className="flex flex-col flex-wrap justify-around px-4 mx-auto gap-y-6 md:flex-row max-w-screen-2xl">
+    <div className="flex flex-col flex-wrap justify-around px-4 mx-auto cursor-default gap-y-6 md:flex-row max-w-screen-2xl">
       <Separator className="my-4" />
       <FeatureCard
         title="LIVRASION rapide"

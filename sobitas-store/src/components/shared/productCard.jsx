@@ -110,7 +110,6 @@ const ProductCard = ({
           </div>
         </div>
       )}
-
       {/* Badges */}
       <div className="absolute z-20 space-y-1 text-white top-4 left-4">
         {product?.oldPrice !== 0 && (
@@ -124,7 +123,6 @@ const ProductCard = ({
           </span>
         )}
       </div>
-
       <Link
         href={`/${typeRef}/${product?.slug}`}
         className="flex flex-col flex-1 h-full"
@@ -186,7 +184,7 @@ const ProductCard = ({
           </div>
 
           {/* Price section - fixed height */}
-          <div className="flex flex-col items-center justify-center h-16 mb-2">
+          <div className="flex flex-col items-center justify-center h-12 mb-1 md:flex-row md:space-x-2">
             <span className="text-base font-semibold text-[#EF837B]">
               {formatCurrency(product?.price + product?.price * 0.19)}
             </span>
@@ -200,7 +198,7 @@ const ProductCard = ({
           </div>
 
           {/* Ratings - fixed height */}
-          <div className="flex items-center justify-center h-6 mb-2">
+          <div className="flex items-center justify-center ">
             <Rate
               value={averageRating}
               disabled
@@ -211,7 +209,7 @@ const ProductCard = ({
           </div>
 
           {/* Flash sale timer - fixed height container */}
-          <div className="flex items-center justify-center h-8">
+          <div className="flex items-center justify-center h-14">
             {product?.features?.includes("vente-flash") &&
               product?.venteflashDate && (
                 <CountdownTimer targetDate={product.venteflashDate} />
@@ -219,9 +217,8 @@ const ProductCard = ({
           </div>
         </div>
       </Link>
-
-      {/* Add to cart button - always visible */}
-      <div className="p-2 pt-0 sm:p-4">
+      {/* Add to cart button  */}
+      <div className="absolute bottom-0 left-0 right-0 p-2 transition-transform duration-300 translate-y-full bg-white group-hover:translate-y-0 sm:p-4">
         <Button
           onClick={handleAddToCart}
           disabled={!product?.inStock}
