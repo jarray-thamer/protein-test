@@ -4,8 +4,9 @@ import Header from "@/components/headers/header";
 import BrandSection from "@/components/homePage/bandSection";
 import Feature from "@/components/homePage/feature";
 import Reviews from "@/components/homePage/reviews";
-import { Separator } from "@/components/ui/separator";
+
 import { AuthProvider } from "@/context/authContext";
+
 import useCartStore from "@/store/cart";
 import useInformationStore from "@/store/information";
 import { useEffect } from "react";

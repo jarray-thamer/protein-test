@@ -111,12 +111,6 @@ const ProductCard = memo(
           type: type === "pack" ? "Pack" : "Product",
           quantity: 1, // Explicitly set quantity for clarity
         });
-
-        toast({
-          title: "Produit ajouté",
-          description: "Le produit a été ajouté à votre panier.",
-          variant: "default",
-        });
       },
       [product, type, addToCart]
     );
@@ -139,13 +133,8 @@ const ProductCard = memo(
           {/* Left badges */}
           <div className="space-y-1 text-white">
             {product?.oldPrice !== 0 && discountPercentage > 0 && (
-              <span className="py-0.5 px-1.5 text-[10px] font-medium bg-[#ef837b] rounded-sm block">
+              <span className="py-0.25 px-1 text-[14px] font-medium bg-[#ef837b] rounded-sm block">
                 Promo -{discountPercentage}%
-              </span>
-            )}
-            {product?.features?.includes("vente-flash") && (
-              <span className="py-0.5 px-1.5 text-[10px] font-medium bg-amber-500 rounded-sm block">
-                Flash
               </span>
             )}
           </div>
@@ -153,7 +142,7 @@ const ProductCard = memo(
           {/* Right badges */}
           <div className="space-y-1 text-white">
             {type === "pack" && (
-              <span className="py-0.5 px-1.5 text-[10px] font-medium bg-[#A786DF] rounded-sm block">
+              <span className="py-0.25 px-1 text-[8px] font-medium bg-[#A786DF] rounded-sm block">
                 Pack
               </span>
             )}
@@ -210,7 +199,7 @@ const ProductCard = memo(
           </div>
 
           {/* Product details section */}
-          <div className="flex flex-col flex-1 px-3 pt-4 pb-16 text-center sm:px-4 sm:pt-5">
+          <div className="flex flex-col flex-1 px-3 pt-4 pb-4 text-center sm:px-4 sm:pt-5">
             {/* Brand */}
             {product?.brand && (
               <div className="mb-1.5">
@@ -253,7 +242,7 @@ const ProductCard = memo(
             {/* Flash sale timer */}
             {product?.features?.includes("vente-flash") &&
               product?.venteflashDate && (
-                <div className="mt-auto">
+                <div className="">
                   <CountdownTimer targetDate={product.venteflashDate} />
                 </div>
               )}
@@ -265,7 +254,8 @@ const ProductCard = memo(
           className={cn(
             "absolute bottom-0 left-0 right-0 p-3 bg-white transition-all duration-300",
             isHovered ? "translate-y-0" : "translate-y-full",
-            "group-hover:translate-y-0 sm:p-4"
+            "group-hover:translate-y-0 sm:p-4",
+            isMobile ? "hidden" : "block"
           )}
         >
           <Button
@@ -290,23 +280,6 @@ const ProductCard = memo(
             </span>
           </Button>
         </div>
-
-        {/* Stock indicator */}
-        {product?.inStock && product?.stockQuantity && (
-          <div className="absolute bottom-0 left-0 right-0 h-1">
-            <div
-              className={cn(
-                "h-full bg-green-500",
-                product.stockQuantity > 10
-                  ? "w-full"
-                  : product.stockQuantity > 5
-                  ? "w-1/2"
-                  : "w-1/4"
-              )}
-              aria-hidden="true"
-            />
-          </div>
-        )}
       </div>
     );
   }

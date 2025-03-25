@@ -99,7 +99,6 @@ const ProductPageContent = () => {
     const initializeData = async () => {
       setIsInitializing(true);
       try {
-        // 1. First fetch categories and subcategories in parallel
         const [categoriesResponse, subCategoriesResponse] = await Promise.all([
           getCategories(),
           getSubCategories(),
@@ -109,7 +108,6 @@ const ProductPageContent = () => {
         setSubCategories(subCategoriesResponse);
         setFilteredSubCategories(subCategoriesResponse);
 
-        // 2. Get max price
         const priceResponse = await getProductListPage("sort=-price&limit=1");
         if (priceResponse.data.products?.length > 0) {
           const maxPriceValue = Math.ceil(priceResponse.data.products[0].price);
@@ -120,17 +118,24 @@ const ProductPageContent = () => {
 
         setShowPromoOnly(promo === "true");
 
-        // 3. Apply any URL parameters (like category filter)
-        if (categoriesResponse.length > 0 && categoryParam) {
-          const categoryExists = categoriesResponse.some(
-            (cat) => cat.designation === categoryParam
+        // Initialize filters from URL parameters
+        const categoryParams = searchParams.getAll("category"); // Get all category params
+        const subCategoryParams = searchParams.getAll("subcategory"); // Get all subcategory params
+
+        if (categoriesResponse.length > 0 && categoryParams.length > 0) {
+          const validCategories = categoryParams.filter((param) =>
+            categoriesResponse.some((cat) => cat.designation === param)
           );
-          if (categoryExists) {
-            setSelectedCategories([categoryParam]);
-          }
+          setSelectedCategories(validCategories);
         }
 
-        // 4. Now fetch products only once with the initialized filters
+        if (subCategoriesResponse.length > 0 && subCategoryParams.length > 0) {
+          const validSubCategories = subCategoryParams.filter((param) =>
+            subCategoriesResponse.some((subCat) => subCat.designation === param)
+          );
+          setSelectedSubCategories(validSubCategories);
+        }
+
         await fetchProductsInternal();
       } catch (error) {
         console.error("Error initializing data:", error);
@@ -140,7 +145,7 @@ const ProductPageContent = () => {
     };
 
     initializeData();
-  }, [categoryParam, promo]); // Only depend on URL parameters
+  }, [categoryParam, promo, searchParams]); // Only depend on URL parameters
 
   // Create an internal fetch function that doesn't depend on state
   const fetchProductsInternal = async () => {
