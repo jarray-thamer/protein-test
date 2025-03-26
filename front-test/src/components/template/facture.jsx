@@ -128,13 +128,13 @@ const FacturePDF = ({ data, entreprise }) => {
                   { label: "Total HT:", value: data?.totalHT.toFixed(3) },
                   { label: "TVA:", value: data?.tva.toFixed(3) },
                   { label: "Remise:", value: data?.discount.toFixed(3) },
-                  // {
-                  //   label: "Livraison:",
-                  //   value:
-                  //     data.livraison.toFixed(3) ||
-                  //     entreprise?.advanced.livraison.toFixed(3) ||
-                  //     0,
-                  // },
+                  {
+                    label: "Livraison:",
+                    value:
+                      data.livraison.toFixed(3) ||
+                      entreprise?.advanced.livraison.toFixed(3) ||
+                      0,
+                  },
                   {
                     label: "Timbre:",
                     value: entreprise?.advanced.timber.toFixed(3),

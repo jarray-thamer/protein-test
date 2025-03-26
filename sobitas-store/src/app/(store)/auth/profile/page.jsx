@@ -463,15 +463,6 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   {getStatusBadge(order.status)}
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      router.push(`/orders/${order._id}`)
-                                    }
-                                  >
-                                    View Details
-                                  </Button>
                                 </div>
                               </div>
                             </CardHeader>
@@ -491,17 +482,17 @@ export default function ProfilePage() {
                                           {item.designation}
                                         </p>
                                         <p className="text-sm text-gray-500">
-                                          {item.quantity} x $
-                                          {item.price?.toFixed(2) || "0.00"}
+                                          {item.quantity} x
+                                          {item.price?.toFixed(2) || "0.00"} TND
                                           {item.variant && ` - ${item.variant}`}
                                         </p>
                                       </div>
                                     </div>
                                     <p className="font-medium">
-                                      $
                                       {(
                                         (item.quantity || 0) * (item.price || 0)
-                                      ).toFixed(2)}
+                                      ).toFixed(2)}{" "}
+                                      TND
                                     </p>
                                   </div>
                                 ))}
@@ -514,7 +505,7 @@ export default function ProfilePage() {
                                 <div className="flex justify-between font-medium">
                                   <p>Total</p>
                                   <p>
-                                    ${order.netAPayer?.toFixed(2) || "0.00"}
+                                    {order.netAPayer?.toFixed(2) || "0.00"} TND
                                   </p>
                                 </div>
                               </div>

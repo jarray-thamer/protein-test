@@ -1,11 +1,43 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Separator } from "../ui/separator";
 import Link from "next/link";
 import { InstagramFilled, YoutubeFilled } from "@ant-design/icons";
 import Image from "next/image";
+import axiosInstance from "@/lib/axios";
 
 const Footer = ({ information }) => {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      setMessage("Please enter your email address");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await axiosInstance.put("/clients/subscribe", {
+        email,
+      });
+
+      if (!response.data.success) {
+        throw new Error("Subscription failed");
+      }
+
+      setMessage("Subscription successful! Thank you!");
+      setEmail("");
+    } catch (error) {
+      setMessage(error.message || "An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <footer className="text-white mt-2 bg-[#222]">
       <div className="mx-auto max-w-screen-2xl">
@@ -21,7 +53,7 @@ const Footer = ({ information }) => {
               {/* <div className="bg-[#000000] text-white p-6 rounded-lg flex flex-col md:flex-row justify-between items-center"> */}
               <form
                 className="flex items-center w-full mt-4 overflow-hidden bg-white rounded-md"
-                // onSubmit={handleSubscribe}
+                onSubmit={handleSubscribe}
                 style={{ transform: "skewX(-20deg)" }}
               >
                 <div
@@ -31,18 +63,32 @@ const Footer = ({ information }) => {
                   <input
                     type="email"
                     placeholder="Votre adresse e-mail"
-                    // value={email}
-                    // onChange={(e) => setEmail(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full p-3 text-black outline-none"
+                    disabled={loading}
                   />
                   <button
                     type="submit"
-                    className="bg-[#FF5000] text-white font-bold px-6 py-3 hover:bg-[#FF8000] transition-all"
+                    className="bg-[#FF5000] text-white font-bold px-6 py-3 hover:bg-[#FF8000] transition-all disabled:opacity-50"
+                    disabled={loading}
                   >
-                    S&apos;abonner
+                    {loading ? "Processing..." : "S'abonner"}
                   </button>
                 </div>
               </form>
+
+              {message && (
+                <p
+                  className={`mt-2 text-sm ${
+                    message.includes("successful")
+                      ? "text-green-400"
+                      : "text-red-400"
+                  }`}
+                >
+                  {message}
+                </p>
+              )}
               {/* </div> */}
             </div>
             {/*  */}

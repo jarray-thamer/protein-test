@@ -65,7 +65,7 @@ const BlogSection = () => {
   if (blogs.length === 0) return null;
 
   return (
-    <div>
+    <div className="mt-20">
       <h3 className="text-[34px] text-center text-black3 uppercase font-bold rubik">
         Blogs
       </h3>

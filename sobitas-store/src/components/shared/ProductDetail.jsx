@@ -446,9 +446,9 @@ const DetailTabs = ({ item, selectDescription, setSelectDescription }) => {
         <AnimatePresence mode="wait">
           {selectDescription === 1 && (
             <motion.div key="desc" variants={fadeVariants}>
-              <p
+              <div
+                className="prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: item.description }}
-                className="text-[#777]"
               />
             </motion.div>
           )}
@@ -485,9 +485,9 @@ const DetailTabs = ({ item, selectDescription, setSelectDescription }) => {
           )}
           {selectDescription === 4 && (
             <motion.div key="question" variants={fadeVariants}>
-              <p
-                dangerouslySetInnerHTML={{ __html: item?.question }}
-                className="text-[#777]"
+              <div
+                className="prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: item.question }}
               />
             </motion.div>
           )}

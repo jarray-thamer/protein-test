@@ -15,7 +15,7 @@ exports.createVente = async (req, res) => {
     const reference = await generateReference();
     const advancedInfo = await Information.findOne().select("advanced -_id");
     const { items } = req.body;
-    const { clientId } = req.body || "";
+    let { clientId } = req.body || "";
     const { client } = req.body;
     const { livreur } = req.body;
 
@@ -28,10 +28,9 @@ exports.createVente = async (req, res) => {
         ville: client.ville || "",
       });
       const savedClient = await newClient.save();
+      clientId = savedClient._id; // Assign new client ID
     } else {
-      // Validate client existence
       const clientExists = await Client.findById(clientId);
-
       if (!clientExists) {
         return res.status(400).json({ message: "Client not found" });
       }
@@ -166,7 +165,10 @@ exports.createVente = async (req, res) => {
     });
 
     const savedVente = await vente.save();
-
+    // Add Vente ID to Client's ordersId
+    await Client.findByIdAndUpdate(clientId, {
+      $push: { ordersId: savedVente._id },
+    });
     res.status(201).json({ success: true, reference: savedVente.reference });
   } catch (error) {
     res.status(500).json({
@@ -272,25 +274,46 @@ exports.updateVente = async (req, res) => {
   try {
     const { id } = req.params;
     const {
+      client: newClientData,
       items,
-      client,
       livreur,
-      modePayment,
-      status,
-      note,
       livraison,
-      promoCode: newPromoCode,
       additionalCharges,
       additionalDiscount,
-      createdAt, // Extract createdAt from req.body
+      createdAt,
+      note,
+      status,
+      modePayment,
+      ...otherUpdates
     } = req.body;
 
-    // Fetch existing vente
+    // Fetch existing vente to get the old client ID
     const existingVente = await Vente.findById(id);
     if (!existingVente) {
-      return res.status(404).json({
-        success: false,
-        message: "Purchase order not found",
+      return res
+        .status(404)
+        .json({ success: false, message: "Vente not found" });
+    }
+
+    const oldClientId = existingVente.client.id.toString();
+    const newClientId = newClientData?.id?.toString(); // From request body
+
+    // If client ID is being changed
+    if (newClientId && newClientId !== oldClientId) {
+      // Validate new client exists
+      const newClientExists = await Client.findById(newClientId);
+      if (!newClientExists) {
+        return res.status(400).json({ message: "New client not found" });
+      }
+
+      // Remove vente ID from old client's ordersId
+      await Client.findByIdAndUpdate(oldClientId, {
+        $pull: { ordersId: existingVente._id },
+      });
+
+      // Add vente ID to new client's ordersId
+      await Client.findByIdAndUpdate(newClientId, {
+        $addToSet: { ordersId: existingVente._id },
       });
     }
 
@@ -310,12 +333,12 @@ exports.updateVente = async (req, res) => {
 
     // Validate new promo code
     let promotionCode = existingVente.promoCode;
-    if (newPromoCode) {
-      promotionCode = await PromoCode.findOne({ code: newPromoCode });
-      if (!promotionCode) {
-        return res.status(400).json({ message: "Promotion code not found" });
-      }
-    }
+    // if (newPromoCode) {
+    //   promotionCode = await PromoCode.findOne({ code: newPromoCode });
+    //   if (!promotionCode) {
+    //     return res.status(400).json({ message: "Promotion code not found" });
+    //   }
+    // }
 
     // Process items
     for (const item of items) {
@@ -386,9 +409,21 @@ exports.updateVente = async (req, res) => {
 
     // Prepare update data
     const updateData = {
-      client,
-      livreur: updatedLivreur,
-      items,
+      ...otherUpdates, // Spread other fields like items, livreur, totals, etc.
+      client: {
+        id: newClientId || existingVente.client.id, // Use new ID if provided
+        name: newClientData?.name || existingVente.client.name,
+        phone: newClientData?.phone || existingVente.client.phone,
+        email: newClientData?.email || existingVente.client.email,
+        address: newClientData?.address || existingVente.client.address,
+        ville: newClientData?.ville || existingVente.client.ville,
+        clientNote:
+          newClientData?.clientNote || existingVente.client.clientNote,
+        phone1: newClientData?.phone1 || existingVente.client.phone1,
+        phone2: newClientData?.phone2 || existingVente.client.phone2,
+      },
+      updatedLivreur,
+      items: items || existingVente.items, // Use updated items or existing ones
       tva: tva.toFixed(3),
       totalHT: totalHT.toFixed(3),
       totalTTC: totalTTC.toFixed(3),
@@ -397,10 +432,10 @@ exports.updateVente = async (req, res) => {
       additionalCharges: additionalCharges.toFixed(3),
       productsDiscount: productDiscount.plus(packDiscount).toFixed(3),
       netAPayer: netAPayer.toFixed(3),
-      note: note || "",
-      modePayment: modePayment || "CASH",
-      status: status || "pending",
-      promoCode: promoCodeObject,
+      modePayment: modePayment || existingVente.modePayment,
+      status: status || existingVente.status,
+      note: note || existingVente.note,
+      promoCode: promoCodeObject || existingVente.promoCode,
     };
 
     try {
@@ -481,6 +516,11 @@ exports.deleteVente = async (req, res) => {
       });
     }
 
+    // Remove Vente ID from Client's ordersId
+    await Client.findByIdAndUpdate(vente.client.id, {
+      $pull: { ordersId: vente._id },
+    });
+
     res.status(200).json({
       success: true,
       message: "Purchase order deleted successfully",
@@ -498,14 +538,12 @@ exports.deleteVenteMany = async (req, res) => {
   try {
     const ids = req.body;
 
-    // Validate input
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({
         message: "Please provide a non-empty array of ventes IDs",
       });
     }
 
-    // Validate MongoDB IDs
     const invalidIds = ids.filter((id) => !mongoose.Types.ObjectId.isValid(id));
     if (invalidIds.length > 0) {
       return res.status(400).json({
@@ -514,14 +552,23 @@ exports.deleteVenteMany = async (req, res) => {
       });
     }
 
-    // Delete operation
-    const deleteResult = await Vente.deleteMany({
-      _id: { $in: ids },
-    });
+    // Fetch ventes to map client associations
+    const ventes = await Vente.find({ _id: { $in: ids } });
+    const clientVentesMap = new Map();
+    for (const vente of ventes) {
+      const clientId = vente.client.id.toString();
+      if (!clientVentesMap.has(clientId)) {
+        clientVentesMap.set(clientId, []);
+      }
+      clientVentesMap.get(clientId).push(vente._id);
+    }
 
-    if (deleteResult.deletedCount === 0) {
-      return res.status(404).json({
-        message: "No matching ventes found to delete",
+    const deleteResult = await Vente.deleteMany({ _id: { $in: ids } });
+
+    // Remove ventes from clients' ordersId
+    for (const [clientId, venteIds] of clientVentesMap.entries()) {
+      await Client.findByIdAndUpdate(clientId, {
+        $pullAll: { ordersId: venteIds },
       });
     }
 
@@ -691,6 +738,9 @@ exports.createCommandeVente = async (req, res) => {
     });
 
     const savedVente = await vente.save();
+    await Client.findByIdAndUpdate(clientId, {
+      $push: { ordersId: savedVente._id },
+    });
     res.status(201).json({ success: true, reference: savedVente.reference });
   } catch (error) {
     res.status(500).json({

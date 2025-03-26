@@ -134,7 +134,7 @@ const Materiel = () => {
                   hover:text-white hover:bg-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50"
                 >
                   <span className="text-sm font-medium md:text-base">
-                    Discover more
+                    Découvrez plus
                   </span>
                 </button>
               </Link>

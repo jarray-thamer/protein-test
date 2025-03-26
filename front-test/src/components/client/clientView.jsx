@@ -346,7 +346,7 @@ const ClientView = () => {
                             variant="ghost"
                             size="sm"
                             className="h-8 px-2"
-                            onClick={() => navigate(`/orders/${order._id}`)}
+                            onClick={() => navigate(`/vente/${order._id}`)}
                           >
                             View Details
                           </Button>

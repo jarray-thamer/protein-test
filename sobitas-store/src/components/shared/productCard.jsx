@@ -142,7 +142,7 @@ const ProductCard = memo(
           {/* Right badges */}
           <div className="space-y-1 text-white">
             {type === "pack" && (
-              <span className="py-0.25 px-1 text-[8px] font-medium bg-[#A786DF] rounded-sm block">
+              <span className="py-0.25 px-1 text-[14px] font-medium bg-[#A786DF] rounded-sm block">
                 Pack
               </span>
             )}

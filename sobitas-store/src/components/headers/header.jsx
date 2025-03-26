@@ -1,8 +1,19 @@
 "use client";
+
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlignJustifyIcon, Search } from "lucide-react";
+import {
+  AlignJustifyIcon,
+  PhoneIcon,
+  Search,
+  UserRoundIcon,
+  ShoppingBag,
+  Heart,
+  X,
+  ChevronDown,
+} from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -12,14 +23,23 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useState, useEffect } from "react";
+import { Separator } from "@/components/ui/separator";
+import { motion, AnimatePresence } from "framer-motion";
 import useWishlistStore from "@/store/wishlist";
 import useInformationStore from "@/store/information";
 import EnhancedSearchForm from "./searchForm";
-import CategoryNavigation from "./categoryNavigation";
-import { getCategories } from "@/services/category";
 import AccordionCategoryNav from "./accordingCategoryNav";
-import { InstagramFilled, YoutubeFilled } from "@ant-design/icons";
+import { getCategories } from "@/services/category";
+import {
+  InstagramIcon,
+  YoutubeIcon,
+  FacebookIcon,
+  TwitterIcon,
+  LinkedinIcon,
+} from "lucide-react";
+import TopHeader from "./topHeader";
+import BoutiqueDropdown from "./dropDownBoutique";
+import { useAuthStore } from "@/store/authStore";
 
 export const NavHeader = () => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -27,17 +47,40 @@ export const NavHeader = () => {
   const { information } = useInformationStore();
   const router = useRouter();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [showBoutiqueDropdown, setShowBoutiqueDropdown] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const dropdownTimeoutRef = useRef(null);
 
   // Handle search results
   const handleSearch = (results) => {
-    // You can use this to show a dropdown of results or other UI feedback
-    console.log("Search results:", results);
+    // Implementation for search results
   };
 
-  // Toggle search expansion on mobile
-  const toggleSearch = () => {
-    setIsSearchExpanded(!isSearchExpanded);
-  };
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const res = await getCategories();
+      setCategories(res);
+    };
+    fetchCategories();
+  }, []);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   // Close expanded search when clicking outside
   useEffect(() => {
@@ -60,248 +103,311 @@ export const NavHeader = () => {
     };
   }, [isSearchExpanded]);
 
-  const [categories, setCategories] = useState([]);
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const res = await getCategories();
-      setCategories(res);
-    };
-    fetchCategories();
-  }, []);
-
   // Close the sheet
   const handleCloseSheet = () => {
     setIsSheetOpen(false);
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
   };
 
+  // Handle dropdown hover with delay
+  const handleDropdownEnter = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setShowBoutiqueDropdown(true);
+  };
+
+  const handleDropdownLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setShowBoutiqueDropdown(false);
+    }, 300);
+  };
+
+  const { user } = useAuthStore();
+
   return (
     <>
-      <div className="sticky top-0 z-50 w-full bg-white shadow-lg">
-        <div className="flex items-center justify-between px-4 py-4 mx-auto text-black3 max-w-screen-2xl">
-          {/*logo and navigations*/}
-          <div className="flex items-center space-x-8 text-sm uppercase">
-            <Link href="/">
-              <Image
-                src={information?.general?.logo?.url || "/logo.png"}
-                alt={"logo"}
-                height={1080}
-                width={1440}
-                className="h-auto w-44 md:w-[200px]"
-              />
-            </Link>
-            <Link
-              className="items-center hidden ml-6 lg:flex hover:text-primary"
-              href={"/products"}
-            >
-              <h6>Boutique</h6>
-            </Link>
-            <Link
-              className="items-center hidden ml-6 lg:flex hover:text-primary"
-              href={"/products?promo=true"}
-            >
-              <h6>Promotion</h6>
-            </Link>
-            <Link
-              className="items-center hidden ml-6 lg:flex hover:text-primary"
-              href={"/#nos-marques"}
-            >
-              <h6>Marques</h6>
-            </Link>
-            <Link
-              className="items-center hidden ml-6 lg:flex hover:text-primary"
-              href={"/packs"}
-            >
-              <h6>Packs</h6>
-            </Link>
-            <Link
-              className="items-center hidden ml-6 lg:flex hover:text-primary"
-              href={"/contact-us"}
-            >
-              <h6>Contact</h6>
-            </Link>
-          </div>
-
-          {/* Desktop search */}
-          <div className="hidden w-1/2 max-w-xl lg:block">
-            <EnhancedSearchForm
-              categories={categories}
-              onSearch={handleSearch}
-              className="header-search"
-              placeholder="Search products..."
+      <TopHeader />
+      <div className="flex-col hidden w-screen mx-auto md:flex max-w-screen-2xl">
+        <div className="font-light flex justify-end items-center text-[#777777] text-[14px] 2xl:text-base uppercase py-2 space-x-6 px-4">
+          <Link
+            href="/"
+            className="flex items-center space-x-1 transition-colors duration-200 hover:text-primary"
+          >
+            <PhoneIcon
+              size={6}
+              strokeWidth={1.8}
+              className="size-[12px] 2xl:size-[13px]"
             />
+            <h6>CALL: {information?.general?.contact?.fax}</h6>
+          </Link>
+
+          <Link
+            href="/contact-us"
+            className="transition-colors duration-200 hover:text-primary"
+          >
+            contact us
+          </Link>
+          {user ? (
+            <Link
+              href={`/auth/profile`}
+              className="flex items-center justify-center space-x-1 transition-colors duration-200 hover:text-primary"
+            >
+              <UserRoundIcon
+                size={6}
+                strokeWidth={2}
+                className="size-[14px] 2xl:size-[16px] m-0 p-0"
+              />
+              <span>Profil</span>
+            </Link>
+          ) : (
+            <Link
+              href={`/auth/login`}
+              className="flex items-center justify-center space-x-1 transition-colors duration-200 hover:text-primary"
+            >
+              <UserRoundIcon
+                size={6}
+                strokeWidth={2}
+                className="size-[14px] 2xl:size-[16px] m-0 p-0"
+              />
+              <span>login</span>
+            </Link>
+          )}
+        </div>
+        <Separator className="h-0.5 px-12" />
+      </div>
+
+      <motion.div
+        className={`sticky top-0 z-50 w-full bg-white ${
+          isScrolled ? "shadow-lg" : "shadow-sm"
+        }`}
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="relative flex items-center justify-between w-screen px-4 py-4 mx-auto text-black3 max-w-screen-2xl">
+          {/*logo and navigations*/}
+          <div className="relative flex items-center space-x-8 text-sm uppercase">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Link href="/">
+                <Image
+                  src={information?.general?.logo?.url || "/logo.png"}
+                  alt={"logo"}
+                  height={1080}
+                  width={1440}
+                  className="h-auto w-44 md:w-[200px]"
+                  priority
+                />
+              </Link>
+            </motion.div>
+
+            <div
+              className="relative"
+              onMouseEnter={handleDropdownEnter}
+              onMouseLeave={handleDropdownLeave}
+            >
+              <Link
+                className="items-center hidden space-x-1 transition-colors duration-200 lg:flex hover:text-primary"
+                href={"/products"}
+              >
+                <h6>Boutique</h6>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform duration-300 ${
+                    showBoutiqueDropdown ? "rotate-180" : ""
+                  }`}
+                />
+              </Link>
+              <AnimatePresence>
+                {showBoutiqueDropdown && <BoutiqueDropdown />}
+              </AnimatePresence>
+            </div>
+
+            <NavLink href="/products?promo=true" label="Promotion" />
+            <NavLink href="/#nos-marques" label="Marques" />
+            <NavLink href="/packs" label="Packs" />
+            <NavLink href="/contact-us" label="Contact" />
           </div>
 
-          {/* Mobile menu trigger */}
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger className="flex ml-4 lg:hidden">
-              <AlignJustifyIcon
-                strokeWidth={1.8}
-                size={28}
-                className="cursor-pointer"
+          {/* Desktop search and icons */}
+          <div className="flex items-center space-x-6">
+            <div className="hidden w-full max-w-xl lg:block">
+              <EnhancedSearchForm
+                categories={categories}
+                onSearch={handleSearch}
+                className="header-search"
+                placeholder="Search products..."
               />
-            </SheetTrigger>
+            </div>
 
-            {/* Mobile menu sheet content */}
-            <SheetContent
-              side="left"
-              className="z-[999] overflow-y-auto"
-              onInteractOutside={(e) => e.preventDefault()}
-            >
-              <SheetHeader>
-                <SheetTitle>
-                  <Link href="/" onClick={handleCloseSheet}>
-                    <Image
-                      src="/logo.png"
-                      width={120}
-                      height={1080}
-                      alt="logo"
-                    />
-                  </Link>
-                </SheetTitle>
-                <SheetDescription className="relative">
-                  <div className="mt-4 mb-6">
-                    <EnhancedSearchForm
+            {/* Icons */}
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+                className="p-2 transition-colors duration-200 rounded-full hover:bg-gray-100 lg:hidden"
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
+
+              {/* <Link
+                href="/wishlist"
+                className="relative p-2 transition-colors duration-200 rounded-full hover:bg-gray-100"
+                aria-label="Wishlist"
+              >
+                <Heart size={20} />
+                {wishlistCount > 0 && (
+                  <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white rounded-full -top-1 -right-1 bg-primary">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link> */}
+
+              {/* <Link
+                href="/cart"
+                className="relative p-2 transition-colors duration-200 rounded-full hover:bg-gray-100"
+                aria-label="Cart"
+              >
+                <ShoppingBag size={20} />
+                <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white rounded-full -top-1 -right-1 bg-primary">
+                  0
+                </span>
+              </Link> */}
+            </div>
+
+            {/* Mobile menu trigger */}
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger className="flex ml-4 lg:hidden">
+                <AlignJustifyIcon
+                  strokeWidth={1.8}
+                  size={28}
+                  className="cursor-pointer"
+                />
+              </SheetTrigger>
+
+              {/* Mobile menu sheet content */}
+              <SheetContent
+                side="left"
+                className="z-[999] overflow-y-auto"
+                onInteractOutside={(e) => e.preventDefault()}
+              >
+                <SheetHeader>
+                  <SheetTitle className="flex items-center justify-between">
+                    <Link href="/" onClick={handleCloseSheet}>
+                      <Image
+                        src="/logo.png"
+                        width={120}
+                        height={1080}
+                        alt="logo"
+                      />
+                    </Link>
+                    <button
+                      onClick={handleCloseSheet}
+                      className="p-2 transition-colors duration-200 rounded-full hover:bg-gray-100"
+                    >
+                      <X size={20} />
+                    </button>
+                  </SheetTitle>
+                  <SheetDescription className="relative">
+                    <div className="mt-4 mb-6">
+                      <EnhancedSearchForm
+                        categories={categories}
+                        onSearch={handleSearch}
+                        className="mobile-drawer-search"
+                        placeholder="Search products..."
+                        isMobile={true}
+                      />
+                    </div>
+
+                    {/*  Category Navigation with filtering */}
+                    <AccordionCategoryNav
                       categories={categories}
-                      onSearch={handleSearch}
-                      className="mobile-drawer-search"
-                      placeholder="Search products..."
-                      isMobile={true}
+                      onNavigate={handleCloseSheet}
                     />
+                  </SheetDescription>
+                </SheetHeader>
+                <SheetFooter className="bottom-0 mt-auto">
+                  <div className="flex flex-wrap gap-4 mt-6">
+                    <SocialIcon
+                      href={information?.general?.social?.facebookUrl}
+                    >
+                      <FacebookIcon size={20} />
+                    </SocialIcon>
+                    <SocialIcon href={information?.general?.social?.twitterUrl}>
+                      <TwitterIcon size={20} />
+                    </SocialIcon>
+                    <SocialIcon
+                      href={information?.general?.social?.instagramUrl}
+                    >
+                      <InstagramIcon size={20} />
+                    </SocialIcon>
+                    <SocialIcon href={information?.general?.social?.youtubeUrl}>
+                      <YoutubeIcon size={20} />
+                    </SocialIcon>
+                    <SocialIcon
+                      href={information?.general?.social?.linkedInUrl}
+                    >
+                      <LinkedinIcon size={20} />
+                    </SocialIcon>
                   </div>
-
-                  {/*  Category Navigation with filtering */}
-                  <AccordionCategoryNav
-                    categories={categories}
-                    onNavigate={handleCloseSheet}
-                  />
-                </SheetDescription>
-              </SheetHeader>
-              <SheetFooter className="bottom-0 mt-auto">
-                <div className="flex flex-wrap gap-4 mt-6">
-                  <a
-                    href={information?.general?.social?.facebookUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=""
-                  >
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-facebook"
-                    >
-                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                    </svg>
-                  </a>
-                  <a
-                    href={information?.general?.social?.twitterUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=""
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={20}
-                      height={20}
-                      viewBox="0 0 12 12"
-                    >
-                      <path d="M.076 0H3.61l3.145 4.498L10.53 0h1.129L7.185 5.114L12 12H8.468L5.183 7.303L1.128 12H0l4.753-5.312z"></path>
-                    </svg>
-                  </a>
-                  <a
-                    href={information?.general?.social?.instagramUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=""
-                  >
-                    <InstagramFilled className="text-[20px]" />
-                  </a>
-                  <a
-                    href={information?.general?.social?.youtubeUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=""
-                  >
-                    <YoutubeFilled className="text-[20px]" />
-                  </a>
-                  <a
-                    href={information?.general?.social?.linkedInUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=""
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={20}
-                      height={20}
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M20.47 2H3.53a1.45 1.45 0 0 0-1.47 1.43v17.14A1.45 1.45 0 0 0 3.53 22h16.94a1.45 1.45 0 0 0 1.47-1.43V3.43A1.45 1.45 0 0 0 20.47 2M8.09 18.74h-3v-9h3ZM6.59 8.48a1.56 1.56 0 1 1 0-3.12a1.57 1.57 0 1 1 0 3.12m12.32 10.26h-3v-4.83c0-1.21-.43-2-1.52-2A1.65 1.65 0 0 0 12.85 13a2 2 0 0 0-.1.73v5h-3v-9h3V11a3 3 0 0 1 2.71-1.5c2 0 3.45 1.29 3.45 4.06Z"></path>
-                    </svg>
-                  </a>
-                  <a
-                    href={information?.general?.social?.pinterestUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=""
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={20}
-                      height={20}
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M9.04 21.54c.96.29 1.93.46 2.96.46a10 10 0 0 0 10-10A10 10 0 0 0 12 2A10 10 0 0 0 2 12c0 4.25 2.67 7.9 6.44 9.34c-.09-.78-.18-2.07 0-2.96l1.15-4.94s-.29-.58-.29-1.5c0-1.38.86-2.41 1.84-2.41c.86 0 1.26.63 1.26 1.44c0 .86-.57 2.09-.86 3.27c-.17.98.52 1.84 1.52 1.84c1.78 0 3.16-1.9 3.16-4.58c0-2.4-1.72-4.04-4.19-4.04c-2.82 0-4.48 2.1-4.48 4.31c0 .86.28 1.73.74 2.3c.09.06.09.14.06.29l-.29 1.09c0 .17-.11.23-.28.11c-1.28-.56-2.02-2.38-2.02-3.85c0-3.16 2.24-6.03 6.56-6.03c3.44 0 6.12 2.47 6.12 5.75c0 3.44-2.13 6.2-5.18 6.2c-.97 0-1.92-.52-2.26-1.13l-.67 2.37c-.23.86-.86 2.01-1.29 2.7z"></path>
-                    </svg>
-                  </a>
-                  <a
-                    href={information?.general?.social?.whatsAppUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className=""
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={20}
-                      height={20}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M12 1.25c5.937 0 10.75 4.813 10.75 10.75S17.937 22.75 12 22.75c-1.86 0-3.61-.473-5.137-1.305l-4.74.795a.75.75 0 0 1-.865-.852l.8-5.29A10.7 10.7 0 0 1 1.25 12C1.25 6.063 6.063 1.25 12 1.25M7.943 6.7c-.735 0-1.344.62-1.23 1.386c.216 1.436.854 4.082 2.752 5.994c1.984 1.999 4.823 2.854 6.36 3.191c.796.175 1.475-.455 1.475-1.232v-1.824a.3.3 0 0 0-.192-.28l-1.96-.753a.3.3 0 0 0-.166-.014l-1.977.386c-1.275-.66-2.047-1.4-2.51-2.515l.372-2.015a.3.3 0 0 0-.014-.16l-.735-1.969a.3.3 0 0 0-.28-.195z"
-                        clipRule="evenodd"
-                      ></path>
-                    </svg>
-                  </a>
-                </div>
-              </SheetFooter>
-            </SheetContent>
-          </Sheet>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         {/* Expandable mobile search - shows when search icon is clicked */}
-        {isSearchExpanded && (
-          <div
-            id="header-search-container"
-            className="px-4 py-3 bg-white border-t lg:hidden"
-          >
-            <EnhancedSearchForm
-              categories={categories}
-              onSearch={handleSearch}
-              className="mobile-expanded-search"
-              placeholder="Search products..."
-              isMobile={true}
-            />
-          </div>
-        )}
-      </div>
+        <AnimatePresence>
+          {isSearchExpanded && (
+            <motion.div
+              id="header-search-container"
+              className="px-4 py-3 bg-white border-t lg:hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <EnhancedSearchForm
+                categories={categories}
+                onSearch={handleSearch}
+                className="mobile-expanded-search"
+                placeholder="Search products..."
+                isMobile={true}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </>
   );
 };
+
+// Helper component for navigation links
+const NavLink = ({ href, label }) => (
+  <Link
+    className="items-center hidden ml-6 transition-colors duration-200 lg:flex hover:text-primary group"
+    href={href}
+  >
+    <h6 className="relative">
+      {label}
+      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+    </h6>
+  </Link>
+);
+
+// Helper component for social icons
+const SocialIcon = ({ href, children }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noreferrer"
+    className="p-2 transition-colors duration-200 rounded-full hover:bg-gray-100"
+  >
+    {children}
+  </a>
+);
 
 export default NavHeader;
